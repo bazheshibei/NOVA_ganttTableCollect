@@ -2,7 +2,7 @@
 <!-- 表格：大货 -->
 
 <template>
-  <div class="" ref="tableBox">
+  <div ref="comTable">
 
     <el-table :data="tableData_1" border :height="tableHeight" :highlight-current-row="true"
       :cell-style="cellStyle" @expand-change="showMore" @row-click="rowClick"
@@ -14,7 +14,7 @@
         </template>
       </el-table-column>
       <!-- 固定列 -->
-      <el-table-column width="30">
+      <el-table-column width="45">
         <template slot-scope="scope">
           {{scope.row.index + 1}}
         </template>
@@ -24,10 +24,15 @@
       <el-table-column label="服装品类" prop="type_name" width="120"></el-table-column>
       <el-table-column label="款式名称" prop="style_name" width="120"></el-table-column>
       <el-table-column label="业务组" prop="group_name" width="120"></el-table-column>
-      <el-table-column label="审核状态" prop="audit_status" width="100">
-        <!-- "pc": "",                         排产审核状态(仅大货甘特表存在)
-        "tcq": "组长审核",            投产前审核状态(仅大货甘特表存在)
-        "audit_status": "草稿中", //审核状态     直接显示返回内容 -->
+      <el-table-column label="投产前审核状态" width="100">
+        <template slot-scope="scope">
+          {{scope.row.tcq || '未提报'}}
+        </template>
+      </el-table-column>
+      <el-table-column label="排产审核状态" width="100">
+        <template slot-scope="scope">
+          {{scope.row.pc || '未提报'}}
+        </template>
       </el-table-column>
       <el-table-column label="提报人" prop="reporter" width="100"></el-table-column>
       <el-table-column label="创建时间" width="100">
@@ -68,11 +73,12 @@ import ComTable2 from './table2.vue' // 表格：大货_折叠部分
 export default {
   components: { ComTable2 },
   created() {
-    const that = this
     if (!this.tableData_1.length) {
       /** 请求：表格基础数据 **/
-      this.$store.dispatch('Dh/A_tableData', { that })
+      this.$store.dispatch('Dh/A_tableData')
     }
+    /** 计算：表格高度 **/
+    this._countHeight()
   },
   data() {
     return {
@@ -83,24 +89,6 @@ export default {
     ...mapState('Dh', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading'])
   },
   methods: {
-    _countHeight() {
-      const that = this
-      let i = 0
-      const timer = setInterval(function () {
-        if (Object.keys(that.$refs).length) {
-          const { tableBox } = that.$refs
-          if (tableBox.clientHeight) {
-            const num = tableBox.clientHeight
-            that.tableHeight = num
-            clearInterval(timer)
-          }
-        }
-        if (i > 100) {
-          clearInterval(timer)
-        }
-        i++
-      }, 100)
-    },
     /**
      * [单元格样式]
      */
@@ -121,10 +109,21 @@ export default {
      * @param {[Object]} event  事件
      */
     rowClick(row, column, event) {
-      // console.log(row)
-      const { item_gantt_id, item_id } = row
-      this.$store.commit('saveData', { name: 'item_gantt_id', obj: item_gantt_id, module: 'Dh' })
+      // console.log('点击某一行 ----- ', row)
+      const { item_id, item_gantt_id, item_gantt_detail_id, tcq, pc, tcq_type, pc_type } = row
+      let isEdit = false
+      if (tcq_type === '1' || tcq_type === '4' || tcq_type === '5') { // 草稿 驳回 撤销
+        isEdit = true
+      }
+      if (pc_type === '1' || pc_type === '4' || pc_type === '5') {
+        isEdit = true
+      }
       this.$store.commit('saveData', { name: 'item_id', obj: item_id, module: 'Dh' })
+      this.$store.commit('saveData', { name: 'item_gantt_id', obj: item_gantt_id, module: 'Dh' })
+      this.$store.commit('saveData', { name: 'item_gantt_detail_id', obj: item_gantt_detail_id, module: 'Dh' })
+      this.$store.commit('saveData', { name: 'isChangeNodes', obj: (pc === '审核通过' || tcq === '审核通过'), module: 'Dh' })
+      this.$store.commit('saveData', { name: 'isEdit', obj: isEdit, module: 'Dh' })
+      this.$store.commit('saveData', { name: 'tableRow_1', obj: row, module: 'Dh' })
     },
     /**
      * [展示折叠内容]
@@ -144,6 +143,26 @@ export default {
         /** 请求：表格折叠数据 **/
         this.$store.dispatch('Dh/A_tableOtherData', { row })
       }
+    },
+    /**
+     * [计算：表格高度]
+     */
+    _countHeight() {
+      const that = this
+      let i = 0
+      const timer = setInterval(function () {
+        if (Object.keys(that.$refs).length) {
+          const { comTable } = that.$refs
+          if (comTable.clientHeight) {
+            that.tableHeight = comTable.clientHeight
+            clearInterval(timer)
+          }
+        }
+        if (i > 500) {
+          clearInterval(timer)
+        }
+        i++
+      }, 100)
     }
   }
 }

@@ -142,6 +142,12 @@ export default {
     reset() {
       this.submitVal = [{ typecode: '', searchtype: 'like', searchvalue: '' }]
       this.$store.commit('saveData', { name: 'filter_data', obj: [], module: 'Dh' })
+      /* 重置分页 */
+      this.$store.commit('saveData', { module: 'Dh', name: 'pagenum', obj: 1 })
+      this.$store.commit('saveData', { module: 'Dh', name: 'rownum', obj: 10 })
+      this.$store.commit('saveData', { module: 'Dh', name: 'pageCount', obj: 0 })
+      /** 查询 **/
+      this.$store.dispatch('Dh/A_tableData')
     },
     /**
      * [搜索]
@@ -163,6 +169,12 @@ export default {
      */
     handleClose() {
       this.$store.commit('saveData', { name: 'isDialog', obj: false, module: 'Dh' })
+    },
+    /**
+     * [计算：表格高度]
+     */
+    _countHeight() {
+      this.$emit('_countHeight')
     }
   }
 }

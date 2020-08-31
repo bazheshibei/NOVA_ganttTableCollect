@@ -5,22 +5,26 @@
   <div class="comBox" ref="page">
 
     <div class="topBtnLine">
-      <el-button class="topBtn" type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
-      <el-button class="topBtn" type="primary" size="mini" @click="f5">刷新</el-button>
-      <el-button class="topBtn" type="primary" size="mini">编辑</el-button>
-      <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(1)">提交审核</el-button>
-      <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(2)">撤销审核</el-button>
-      <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || disabledChange[item_gantt_id]" @click="nodeChange">批量变更节点</el-button>
-      <el-button class="topBtn" type="primary" size="mini" plain>导出</el-button>
-      <el-button class="topBtn" type="primary" size="mini" plain>帮助</el-button>
+      <div>
+        <el-button class="topBtn" type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
+        <el-button class="topBtn" type="primary" size="mini" @click="f5">刷新</el-button>
+        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || !isEdit" @click="edit">编辑</el-button>
+        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(1)">提交审核</el-button>
+        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(2)">撤销审核</el-button>
+        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || disabledChange[item_gantt_id] || !isChangeNodes" @click="nodeChange">批量变更节点</el-button>
+      </div>
+      <div>
+        <el-button class="topBtn" type="primary" size="mini" plain>导出</el-button>
+        <el-button class="topBtn" type="primary" size="mini" plain :disabled="!helpText" @click="dialogVisible_help = true">帮助</el-button>
+      </div>
     </div>
 
     <!-- 表格组件 -->
-    <com-table :style="tableStyle" v-loading="loadingPage" element-loading-text="数据加载中..."></com-table>
+    <com-table :style="tableStyle"></com-table>
 
     <!-- 分页 -->
     <div class="paginationBox" ref="bottomBox">
-      <el-pagination :disabled="loadingPage" class="comPagination" :page-size="rownum" :page-sizes="[10, 20, 30, 50, 100]" :total="pageCount" :current-page="pagenum"
+      <el-pagination class="comPagination" :page-size="rownum" :page-sizes="[10, 20, 30, 50, 100]" :total="pageCount" :current-page="pagenum"
         layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
         @size-change="pageChange('rownum', $event)" @current-change="pageChange('pagenum', $event)"
       >
@@ -37,15 +41,28 @@
         <span>{{{ '1': '提交', '2': '撤销' }[audit_status]}}节点：</span>
         <el-radio v-for="(item, index) in itemGanttSummary" :key="'submit_' + index" v-model="radio" :label="index">{{{ '1': '投产前节点', '2': '预排产节点' }[item.gantt_detail_type]}}</el-radio>
       </div>
-      <div class="dialogLine" v-if="audit_status === 2">
+      <div class="dialogLine" v-if="String(audit_status) === '2'">
         <span>撤销说明：</span>
-        <el-input size="mini" placeholder="请填写撤销说明" ></el-input>
+        <el-input size="mini" placeholder="请填写撤销说明" v-model="input"></el-input>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button size="mini" @click="dialogVisible_submit = false">取 消</el-button>
         <el-button size="mini" type="primary" @click="dialogSubmit">
           {{{ '1': '提交审核', '2': '撤销审核' }[audit_status]}}
         </el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 弹出层：编辑 -->
+    <el-dialog class="submitDialog" title="请选择要编辑的项" :visible.sync="dialogVisible_edit" width="40%" :close-on-click-modal="false" :close-on-press-escape="false">
+      <div class="dialogLine">
+        <el-radio v-for="(item, index) in editList" :key="'edit_' + index" v-model="radioEdit" :label="item.value" >
+          {{item.label}}
+        </el-radio>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="mini" @click="dialogVisible_edit = false">取 消</el-button>
+        <el-button size="mini" type="primary" :disabled="!radioEdit" @click="dialogEdit">继 续</el-button>
       </span>
     </el-dialog>
 
@@ -65,6 +82,11 @@
       </span>
     </el-dialog>
 
+    <!-- 弹出层：帮助 -->
+    <el-dialog class="submitDialog" title="帮助" :visible.sync="dialogVisible_help" width="40%">
+      <p v-html="helpText"></p>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -80,6 +102,10 @@ export default {
       /* 弹出层 */
       dialogVisible_submit: false, // 是否显示弹出层：提交/撤销审核
       dialogVisible_change: false, // 是否显示弹出层：批量变更节点
+      dialogVisible_help: false, //   是否显示弹出层：帮助
+      dialogVisible_edit: false, //   是否显示弹出层：选中编辑的项
+      editList: [], //                编辑：投产前、排产
+      radioEdit: '', //               编辑：值
       changeList: [], //              批量变更节点：选项
       radioChange: '', //             批量变更节点：绑定值
       messageChange: '', //           批量变更节点：提示文字
@@ -92,11 +118,57 @@ export default {
   created() {
     /** 计算：表格高度 **/
     this._countHeight()
+    /** 请求：甘特表帮助按钮 **/
+    this.$store.dispatch('Dh/A_getHelpText')
   },
   computed: {
-    ...mapState('Dh', ['pagenum', 'rownum', 'pageCount', 'loadingPage', 'item_gantt_id', 'item_id', 'disabledChange'])
+    ...mapState('Dh', ['pagenum', 'rownum', 'pageCount', 'item_id', 'item_gantt_id', 'item_gantt_detail_id', 'disabledChange', 'isChangeNodes', 'isEdit', 'helpText', 'tableRow_1'])
   },
   methods: {
+    /**
+     * [编辑]
+     */
+    edit() {
+      const { tableRow_1: { tcq_type, pc_type } } = this
+      const arr = []
+      if (tcq_type === '1' || tcq_type === '4' || tcq_type === '5') { // 草稿 驳回 撤销
+        arr.push({ label: '投产前', value: 'tcq' })
+      }
+      if (pc_type === '1' || pc_type === '4' || pc_type === '5') {
+        arr.push({ label: '排产前', value: 'pc' })
+      }
+      if (arr.length === 1) {
+        this.radioEdit = arr[0].value
+        this.dialogEdit()
+      } else if (arr.length > 1) {
+        this.editList = arr
+        this.dialogVisible_edit = true
+      }
+    },
+    /**
+     * [编辑：打开页面]
+     */
+    dialogEdit() {
+      const that = this
+      this.dialogVisible_edit = false
+      /* 提取ID */
+      const { tableRow_1: { item_gantt_detail_id }, radioEdit } = this
+      const arr = JSON.parse(item_gantt_detail_id)
+      const obj = {}
+      arr.forEach(function (item) {
+        for (const x in item) {
+          obj[x] = item[x]
+        }
+      })
+      const id = obj[radioEdit]
+      /* 保存到本地缓存 */
+      const { item_id, item_gantt_id } = this
+      localStorage.setItem('NOVA_reject', JSON.stringify({ item_id, item_gantt_id, item_gantt_detail_id: id }))
+      /* win 方法打开页面 */
+      const url = window.location.origin + '/nova/pages/itemganttsummary/itemGanttSummaryUpdate.html'
+      // eslint-disable-next-line
+      win({ title: '编辑', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) } })
+    },
     /**
      * [节点变更]
      */
@@ -173,10 +245,14 @@ export default {
      * [批量变更节点]
      */
     dialogChange() {
+      /* 保存到本地缓存 */
       const { item_id, item_gantt_id, changeList, radioChange } = this
       const obj = changeList[radioChange]
       localStorage.setItem('NOVA_ItemNodeAdjustmentHtml', JSON.stringify(Object.assign({}, obj, { page_type: 'add', item_id, item_gantt_id, gantt_type: 1 })))
-      // ① 保存到本地缓存，  ② win 方法打开页面
+      /* win 方法打开页面 */
+      const url = window.location.origin + '/nova/pages/itemnodeadjustment/itemNodeBatchAdjustment.html'
+      // eslint-disable-next-line
+      win({ title: '批量变更节点', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) } })
       /* 关闭弹出层 */
       this.dialogVisible_change = false
     },
@@ -188,11 +264,17 @@ export default {
     },
     /**
      * [刷新]
+     * @param {[Boolean]} reset 是否重置分页
      */
-    f5() {
-      this.$store.commit('saveData', { module: 'Dh', name: 'pagenum', obj: 1 })
-      this.$store.commit('saveData', { module: 'Dh', name: 'rownum', obj: 10 })
-      this.$store.commit('saveData', { module: 'Dh', name: 'pageCount', obj: 0 })
+    f5(reset = true) {
+      if (reset) {
+        this.$store.commit('saveData', { module: 'Dh', name: 'pagenum', obj: 1 })
+        this.$store.commit('saveData', { module: 'Dh', name: 'rownum', obj: 10 })
+        this.$store.commit('saveData', { module: 'Dh', name: 'pageCount', obj: 0 })
+      }
+      this.$store.commit('saveData', { module: 'Dh', name: 'item_id', obj: '' })
+      this.$store.commit('saveData', { module: 'Dh', name: 'item_gantt_id', obj: '' })
+      this.$store.commit('saveData', { module: 'Dh', name: 'item_gantt_detail_id', obj: '' })
       /** 发起请求 **/
       this._request()
     },
@@ -212,7 +294,7 @@ export default {
      */
     _request() {
       /** 请求：表格基础数据 **/
-      this.$store.dispatch('Dh/A_tableData', { that: this })
+      this.$store.dispatch('Dh/A_tableData')
     },
     /**
      * [计算：表格高度]
@@ -226,10 +308,11 @@ export default {
           if (page.clientHeight && bottomBox.clientHeight) {
             const num = page.clientHeight - bottomBox.clientHeight - 40
             that.tableStyle = { height: num + 'px' }
+            // , overflowY: 'auto'
             clearInterval(timer)
           }
         }
-        if (i > 100) {
+        if (i > 500) {
           clearInterval(timer)
         }
         i++
@@ -243,6 +326,7 @@ export default {
 .comBox {
   width: 100%;
   height: 100%;
+  overflow-y: auto;
 }
 
 /*** 顶部按钮 ***/
@@ -251,9 +335,13 @@ export default {
   height: 40px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 .topBtn {
   margin-left: 10px;
+}
+.topBtn:last-child {
+  margin-right: 10px;
 }
 
 /*** 分页 ***/

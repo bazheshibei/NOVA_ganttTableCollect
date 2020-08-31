@@ -36,6 +36,7 @@ Tool.mapData = function (list, yjts, name = '') {
 Tool._map = function (item, now, yjts) {
   /* ----- 延期/剩余天数 ----- */
   const num = (new Date(item.plan_enddate).getTime() - now) / (1000 * 60 * 60 * 24) // 相差天数：计划日期 - 当前日期
+  // const num = (now - new Date(item.plan_enddate).getTime()) / (1000 * 60 * 60 * 24) // 超期天数：当前日期 - 计划日期
   if (num < 0) {
     item.timeText = `<span style="color: red;">${num}</span>` // 延期天数
   } else {

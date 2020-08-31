@@ -2,20 +2,20 @@
 <!-- 甘特表汇总 -->
 
 <template>
-  <div class="pageBox" v-on:scroll="pageScroll" ref="page">
+  <div class="pageBox" v-on:scroll="pageScroll" ref="page" v-loading="dh_loading || ml_loading || gc_loading" element-loading-text="数据加载中...">
     <el-tabs class="comTabs" type="border-card" @tab-click="toggleTab">
 
       <el-tab-pane class="tab" label="大货甘特表汇总">
-        <com-dh v-show="active === '大货甘特表汇总'"></com-dh>
+        <com-dh v-if="active === '大货甘特表汇总' || dh.length"></com-dh>
       </el-tab-pane>
 
-      <!-- <el-tab-pane class="tab" label="大货面料甘特表汇总">
-        <com-ml v-show="active === '大货面料甘特表汇总'"></com-ml>
+      <el-tab-pane class="tab" label="大货面料甘特表汇总">
+        <com-ml v-if="active === '大货面料甘特表汇总' || ml.length"></com-ml>
       </el-tab-pane>
 
-      <el-tab-pane class="tab" label="大货工厂甘特表">
-        <com-gc v-show="active === '大货工厂甘特表'"></com-gc>
-      </el-tab-pane> -->
+      <el-tab-pane class="tab" label="大货工厂甘特表汇总">
+        <com-gc v-if="active === '大货工厂甘特表汇总' || gc.length"></com-gc>
+      </el-tab-pane>
 
     </el-tabs>
   </div>
@@ -31,12 +31,29 @@ export default {
   data() {
     return {
       scrollTop: 0,
-      tabs: ['大货甘特表汇总', '大货面料甘特表汇总', '大货工厂甘特表']
+      tabs: ['大货甘特表汇总', '大货面料甘特表汇总', '大货工厂甘特表汇总']
     }
   },
-  created() {},
+  created() {
+    try {
+      /* 平台方法 */
+      // eslint-disable-next-line
+      dg.removeBtn('cancel')
+      // eslint-disable-next-line
+      dg.removeBtn('saveAndAdd')
+      // eslint-disable-next-line
+      dg.removeBtn('saveAndClose')
+      // eslint-disable-next-line
+      dg.removeBtn('saveNoClose')
+    } catch (err) {
+      //
+    }
+  },
   computed: {
-    ...mapState(['active'])
+    ...mapState(['active']),
+    ...mapState('Dh', { dh: state => state.tableData_1, dh_loading: state => state.loadingPage }),
+    ...mapState('Ml', { ml: state => state.tableData_1, ml_loading: state => state.loadingPage }),
+    ...mapState('Gc', { gc: state => state.tableData_1, gc_loading: state => state.loadingPage })
   },
   methods: {
     /**

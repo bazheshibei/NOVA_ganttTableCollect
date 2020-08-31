@@ -5,22 +5,23 @@
   <div class="comBox" ref="page">
 
     <div class="topBtnLine">
-      <el-button class="topBtn" type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
-      <el-button class="topBtn" type="primary" size="mini" @click="f5">刷新</el-button>
-      <el-button class="topBtn" type="primary" size="mini">编辑</el-button>
-      <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(1)">提交审核</el-button>
-      <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(2)">撤销审核</el-button>
-      <el-button class="topBtn" type="primary" size="mini">批量变更节点</el-button>
-      <!-- <el-button class="topBtn" type="primary" size="mini" plain>导出</el-button>
-      <el-button class="topBtn" type="primary" size="mini" plain>帮助</el-button> -->
+      <div>
+        <el-button class="topBtn" type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
+        <el-button class="topBtn" type="primary" size="mini" @click="f5">刷新</el-button>
+        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || !isEdit" @click="edit">编辑</el-button>
+      </div>
+      <div>
+        <el-button class="topBtn" type="primary" size="mini" plain>导出</el-button>
+        <el-button class="topBtn" type="primary" size="mini" plain :disabled="!helpText" @click="dialogVisible_help = true">帮助</el-button>
+      </div>
     </div>
 
     <!-- 表格组件 -->
-    <com-table :style="tableStyle" v-loading="loadingPage" element-loading-text="数据加载中..."></com-table>
+    <com-table :style="tableStyle"></com-table>
 
     <!-- 分页 -->
     <div class="paginationBox" ref="bottomBox">
-      <el-pagination :disabled="loadingPage" class="comPagination" :page-size="rownum" :page-sizes="[10, 20, 30, 50, 100]" :total="pageCount" :current-page="pagenum"
+      <el-pagination class="comPagination" :page-size="rownum" :page-sizes="[10, 20, 30, 50, 100]" :total="pageCount" :current-page="pagenum"
         layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
         @size-change="pageChange('rownum', $event)" @current-change="pageChange('pagenum', $event)"
       >
@@ -31,22 +32,9 @@
     <!-- 高级查询 -->
     <com-advancedQuery></com-advancedQuery>
 
-    <!-- 弹出层：提交/撤销选节点 || 填写撤销说明 -->
-    <el-dialog class="submitDialog" :visible.sync="dialogVisible" width="50%" :close-on-click-modal="false" :close-on-press-escape="false">
-      <div class="dialogLine" v-if="itemGanttSummary.length > 1">
-        <span>{{{ '1': '提交', '2': '撤销' }[audit_status]}}节点：</span>
-        <el-radio v-for="(item, index) in itemGanttSummary" :key="'radio_' + index" v-model="radio" :label="index">{{{ '1': '投产前节点', '2': '预排产节点' }[item.gantt_detail_type]}}</el-radio>
-      </div>
-      <div class="dialogLine" v-if="audit_status === 2">
-        <span>撤销说明：</span>
-        <el-input size="mini" placeholder="请填写撤销说明" ></el-input>
-      </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="dialogVisible = false">取 消</el-button>
-        <el-button size="mini" type="primary" @click="dialogSubmit">
-          {{{ '1': '提交审核', '2': '撤销审核' }[audit_status]}}
-        </el-button>
-      </span>
+    <!-- 弹出层：帮助 -->
+    <el-dialog class="submitDialog" title="帮助" :visible.sync="dialogVisible_help" width="40%">
+      <p v-html="helpText"></p>
     </el-dialog>
 
   </div>
@@ -63,6 +51,7 @@ export default {
       tableStyle: {},
       /* 弹出层 */
       dialogVisible: false, // 是否显示弹出层
+      dialogVisible_help: false, //   是否显示弹出层：帮助
       itemGanttSummary: [], // 甘特表类型数组
       audit_status: 1, //      1提交审核，2撤销审核
       radio: '', //            多选时提交的节点
@@ -72,74 +61,28 @@ export default {
   created() {
     /** 计算：表格高度 **/
     this._countHeight()
+    /** 请求：甘特表帮助按钮 **/
+    this.$store.dispatch('Ml/A_getHelpText')
   },
   computed: {
-    ...mapState('Ml', ['pagenum', 'rownum', 'pageCount', 'loadingPage', 'item_gantt_id'])
+    ...mapState('Ml', ['pagenum', 'rownum', 'pageCount', 'item_id', 'item_gantt_id', 'item_gantt_detail_id', 'isEdit', 'helpText'])
   },
   methods: {
-    /**
-     * [审核操作前的验证]
-     * @param {[Int]} audit_status 1提交审核，2撤销审核
-     */
-    beforeSubmit(audit_status) {
-      this.$store.dispatch('Ml/A_beforeSubmitAudit', { audit_status, that: this })
+    help() {
+      // get 请求
     },
     /**
-     * [审核操作前的验证：返回值]
-     * @param {[Array]} itemGanttSummary 甘特表类型数组
-     * @param {[Int]}   audit_status     1提交审核，2撤销审核
+     * [编辑]
      */
-    beforeSubmit_1(itemGanttSummary, audit_status) {
-      if (itemGanttSummary.length === 1 && audit_status === 1) {
-        /* ----- 不需要弹出层 ----- */
-        const { item_gantt_detail_id = '', item_gantt_id = '' } = itemGanttSummary[0]
-        const obj = { item_gantt_detail_id, item_gantt_id }
-        /** 提交 / 撤销审核 **/
-        this.submitApi(obj, audit_status)
-      } else if (itemGanttSummary.length > 1 || audit_status === 2) {
-        /* ----- 弹出层操作 ----- */
-        this.itemGanttSummary = itemGanttSummary
-        this.audit_status = audit_status
-        this.dialogVisible = true
-      }
-    },
-    /**
-     * [弹出层：确认]
-     */
-    dialogSubmit() {
-      const { itemGanttSummary, audit_status, radio, input } = this
-      /* ----- 验证 ----- */
-      const errArr = []
-      if (itemGanttSummary.length > 1 && radio === '') {
-        errArr.push('选择节点')
-      }
-      if (audit_status === 2 && input === '') {
-        errArr.push('填写撤销说明')
-      }
-      if (errArr.length) {
-        this.$message.error(`请 ${errArr.join('、')}！`)
-        return
-      }
-      /* ----- 提交 ----- */
-      const data = itemGanttSummary.length > 1 ? itemGanttSummary[radio] : itemGanttSummary[0]
-      const { item_gantt_detail_id = '', item_gantt_id = '' } = data || {}
-      const obj = { item_gantt_detail_id, item_gantt_id, audit_remark: audit_status === 2 ? input : '' }
-      /** 提交 / 撤销审核 **/
-      this.submitApi(obj, audit_status)
-    },
-    /**
-     * [提交 / 撤销审核]
-     * @param {[Object]} params      传给接口的参数
-     * @param {[Int]}   audit_status 1提交审核，2撤销审核
-     */
-    submitApi(params, audit_status) {
-      if (audit_status === 1) {
-        this.$store.dispatch('Ml/A_submitAudit', { params, that: this })
-      } else if (audit_status === 2) {
-        this.$store.dispatch('Ml/A_goBackAudit', { params, that: this })
-      }
-      /* 关闭弹出层 */
-      this.dialogVisible = false
+    edit() {
+      const that = this
+      /* 保存到本地缓存 */
+      const { item_id, item_gantt_id, item_gantt_detail_id } = this
+      localStorage.setItem('NOVA_reject', JSON.stringify({ item_id, item_gantt_id, item_gantt_detail_id }))
+      /* win 方法打开页面 */
+      const url = window.location.origin + '/nova/pages/itemganttsummary/itemGanttSummaryUpdate.html'
+      // eslint-disable-next-line
+      win({ title: '编辑', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) } })
     },
     /**
      * [高级查询]
@@ -149,11 +92,17 @@ export default {
     },
     /**
      * [刷新]
+     * @param {[Boolean]} reset 是否重置分页
      */
-    f5() {
-      this.$store.commit('saveData', { module: 'Ml', name: 'pagenum', obj: 1 })
-      this.$store.commit('saveData', { module: 'Ml', name: 'rownum', obj: 10 })
-      this.$store.commit('saveData', { module: 'Ml', name: 'pageCount', obj: 0 })
+    f5(reset = true) {
+      if (reset) {
+        this.$store.commit('saveData', { module: 'Ml', name: 'pagenum', obj: 1 })
+        this.$store.commit('saveData', { module: 'Ml', name: 'rownum', obj: 10 })
+        this.$store.commit('saveData', { module: 'Ml', name: 'pageCount', obj: 0 })
+      }
+      this.$store.commit('saveData', { module: 'Ml', name: 'item_id', obj: '' })
+      this.$store.commit('saveData', { module: 'Ml', name: 'item_gantt_id', obj: '' })
+      this.$store.commit('saveData', { module: 'Ml', name: 'item_gantt_detail_id', obj: '' })
       /** 发起请求 **/
       this._request()
     },
@@ -187,10 +136,11 @@ export default {
           if (page.clientHeight && bottomBox.clientHeight) {
             const num = page.clientHeight - bottomBox.clientHeight - 40
             that.tableStyle = { height: num + 'px' }
+            // , overflowY: 'auto'
             clearInterval(timer)
           }
         }
-        if (i > 100) {
+        if (i > 500) {
           clearInterval(timer)
         }
         i++
@@ -204,6 +154,7 @@ export default {
 .comBox {
   width: 100%;
   height: 100%;
+  overflow-y: auto;
 }
 
 /*** 顶部按钮 ***/
@@ -212,9 +163,13 @@ export default {
   height: 40px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 .topBtn {
   margin-left: 10px;
+}
+.topBtn:last-child {
+  margin-right: 10px;
 }
 
 /*** 分页 ***/

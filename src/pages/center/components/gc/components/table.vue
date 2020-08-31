@@ -2,7 +2,7 @@
 <!-- 表格：工厂 -->
 
 <template>
-  <div class="" ref="tableBox">
+  <div ref="comTable">
 
     <el-table :data="tableData_1" border :height="tableHeight" :highlight-current-row="true"
       :cell-style="cellStyle" @expand-change="showMore" @row-click="rowClick"
@@ -14,7 +14,7 @@
         </template>
       </el-table-column>
       <!-- 固定列 -->
-      <el-table-column width="30">
+      <el-table-column width="45">
         <template slot-scope="scope">
           {{scope.row.index + 1}}
         </template>
@@ -66,11 +66,12 @@ import ComTable2 from './table2.vue' // 表格：工厂_折叠部分
 export default {
   components: { ComTable2 },
   created() {
-    const that = this
     if (!this.tableData_1.length) {
       /** 请求：表格基础数据 **/
-      this.$store.dispatch('Gc/A_tableData', { that })
+      this.$store.dispatch('Gc/A_tableData')
     }
+    /** 计算：表格高度 **/
+    this._countHeight()
   },
   data() {
     return {
@@ -81,24 +82,6 @@ export default {
     ...mapState('Gc', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading'])
   },
   methods: {
-    _countHeight() {
-      const that = this
-      let i = 0
-      const timer = setInterval(function () {
-        if (Object.keys(that.$refs).length) {
-          const { tableBox } = that.$refs
-          if (tableBox.clientHeight) {
-            const num = tableBox.clientHeight
-            that.tableHeight = num
-            clearInterval(timer)
-          }
-        }
-        if (i > 100) {
-          clearInterval(timer)
-        }
-        i++
-      }, 100)
-    },
     /**
      * [单元格样式]
      */
@@ -119,9 +102,16 @@ export default {
      * @param {[Object]} event  事件
      */
     rowClick(row, column, event) {
-      const { item_gantt_id, item_id } = row
-      this.$store.commit('saveData', { name: 'item_gantt_id', obj: item_gantt_id, module: 'Gc' })
+      const { item_id, item_gantt_id, item_gantt_detail_id, audit_status, audit_status_type } = row
+      let isEdit = false
+      if (audit_status_type === '1' || audit_status_type === '4' || audit_status_type === '5') {
+        isEdit = true
+      }
       this.$store.commit('saveData', { name: 'item_id', obj: item_id, module: 'Gc' })
+      this.$store.commit('saveData', { name: 'item_gantt_id', obj: item_gantt_id, module: 'Gc' })
+      this.$store.commit('saveData', { name: 'item_gantt_detail_id', obj: item_gantt_detail_id, module: 'Gc' })
+      this.$store.commit('saveData', { name: 'isChangeNodes', obj: audit_status === '审核通过', module: 'Gc' })
+      this.$store.commit('saveData', { name: 'isEdit', obj: isEdit, module: 'Gc' })
     },
     /**
      * [展示折叠内容]
@@ -141,6 +131,26 @@ export default {
         /** 请求：表格折叠数据 **/
         this.$store.dispatch('Gc/A_tableOtherData', { row })
       }
+    },
+    /**
+     * [计算：表格高度]
+     */
+    _countHeight() {
+      const that = this
+      let i = 0
+      const timer = setInterval(function () {
+        if (Object.keys(that.$refs).length) {
+          const { comTable } = that.$refs
+          if (comTable.clientHeight) {
+            that.tableHeight = comTable.clientHeight
+            clearInterval(timer)
+          }
+        }
+        if (i > 500) {
+          clearInterval(timer)
+        }
+        i++
+      }, 100)
     }
   }
 }

@@ -5,18 +5,18 @@
   <div class="tableContent">
 
     <!-- 按钮组 -->
-    <div class="btnLine">
+    <div class="btnLine" :style="btnLineStyle">
       <div>
         <el-button type="primary" size="mini" @click="f5">刷新</el-button>
         <el-button type="primary" size="mini"
-          :disabled="String(choiceRow.completion_method) === '2' ? true : false" @click="updateWin('完成节点')"
+          :disabled="String(choiceRow.completion_method) === '1' && choiceRow.item_node_id && choiceRow.is_complete === 0 ? false : true" @click="complete"
         >
           完成节点
         </el-button>
-        <el-button type="primary" size="mini" @click="updateWin('节点跟进')">节点跟进</el-button>
-        <el-button type="primary" size="mini">变更节点</el-button>
-        <el-button type="primary" size="mini">取消完成</el-button>
-        <!-- <el-button type="primary" size="mini">调整完成比例</el-button> -->
+        <el-button type="primary" size="mini" @click="followUp">节点跟进</el-button>
+        <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id" @click="change">变更节点</el-button>
+        <el-button type="primary" size="mini" :disabled="!(choiceRow.item_node_id && choiceRow.is_complete !== 0)" @click="cancel">取消完成</el-button>
+        <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id || !choiceRow.node_complete_id" @click="tuneUp">调整完成比例</el-button>
       </div>
       <div class="searchBox">
         <el-input v-model="node_name" size="mini" placeholder="请输入节点名称"></el-input>
@@ -32,7 +32,7 @@
 
     <!-- 表格 -->
     <el-table :data="tableData_2" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..." @row-click="rowClick">
-      <el-table-column width="30">
+      <el-table-column width="45">
         <template slot-scope="scope">
           {{scope.row.index + 1}}
         </template>
@@ -42,13 +42,13 @@
       <!-- 计划完成日期 -->
       <el-table-column label="计划完成日期" prop="plan_enddate" width="120"></el-table-column>
       <!-- 节点状态 -->
-      <el-table-column label="节点状态" width="100">
+      <el-table-column label="节点状态" width="120">
         <template slot-scope="scope">
           <p v-html="scope.row.nodeTypeText"></p>
         </template>
       </el-table-column>
       <!-- 完成方式 -->
-      <!-- <el-table-column label="完成方式" width="100">
+      <!-- <el-table-column label="完成方式" width="120">
         <template slot-scope="scope">
           {{{ 1: '手动', 2: '自动' }[scope.row.completion_method] || ''}}
         </template>
@@ -60,23 +60,23 @@
         </template>
       </el-table-column>
       <!-- 预警状态 -->
-      <el-table-column label="预警状态" width="100">
+      <el-table-column label="预警状态" width="120">
         <template slot-scope="scope">
           <p v-html="scope.row.warningText"></p>
         </template>
       </el-table-column>
       <!-- 实际完成日期 -->
-      <el-table-column label="实际完成日期" prop="actual_enddate"></el-table-column>
+      <el-table-column label="实际完成日期" prop="actual_enddate" width="120"></el-table-column>
       <!-- 完成人 -->
-      <el-table-column label="完成人" prop="complete_employeename"></el-table-column>
+      <el-table-column label="完成人" prop="complete_employeename" width="120"></el-table-column>
       <!-- 审核状态 -->
-      <el-table-column label="审核状态">
+      <el-table-column label="审核状态" width="120">
         <template slot-scope="scope">
           {{{ 1: '完成待审核', 2: '审核通过', 3: '审核驳回' }[scope.row.audit_status] || '无需审核'}}
         </template>
       </el-table-column>
       <!-- 节点变更记录 -->
-      <el-table-column label="节点变更记录">
+      <el-table-column label="节点变更记录" width="600">
         <template slot-scope="scope">
           <div class="comCellBox">
             <div class="comCell">
@@ -88,7 +88,7 @@
     </el-table>
 
     <!-- 分页 -->
-    <div class="paginationBox">
+    <div class="paginationBox" :style="{ width: paginationWidth + 'px' }">
       <el-pagination :disabled="loading2" class="comPagination table2_comPagination" :page-size="pageObj_2.rownum" :page-sizes="[10, 20, 30, 50, 100]" :total="pageObj_2.pageCount" :current-page="pageObj_2.pagenum"
         layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
         @size-change="pageChange('rownum', $event)" @current-change="pageChange('pagenum', $event)"
@@ -106,13 +106,17 @@ export default {
   props: ['row'], // 此条数据
   data() {
     return {
-      choiceRow: {}, // 选中的行
-      node_name: '', // 搜索：节点名称
-      status: '' //     搜索：节点状态
+      paginationWidth: 0, // 分页容器宽度
+      btnLineStyle: {}, //   按钮组样式
+      choiceRow: {}, //      选中的行
+      node_name: '', //      搜索：节点名称
+      status: '' //          搜索：节点状态
     }
   },
   created() {
-    //
+    this.paginationWidth = window.document.documentElement.clientWidth - 45
+    const btnLineStyle = { width: (window.document.documentElement.clientWidth - 60) + 'px' }
+    this.btnLineStyle = btnLineStyle
   },
   computed: {
     ...mapState('Ml', ['loading', 'pageObj']),
@@ -142,6 +146,78 @@ export default {
   },
   methods: {
     /**
+     * [完成节点]
+     * @click {[choiceRow.completion_method]} 1 手动完成
+     * @click {[choiceRow.item_node_id]}        选中节点
+     * @click {[choiceRow.is_complete]}       0 节点未完成
+     */
+    complete() {
+      /* 加载动画 */
+      const { row: { index }, loading } = this
+      loading[index] = true
+      /* 发起请求 */
+      const { choiceRow: { item_id, item_node_id, completion_method } } = this
+      /** 请求：节点完成前验证 **/
+      this.$store.dispatch('Ml/A_testItemNodeStatus', { item_id, item_node_id, completion_method, index })
+    },
+    /**
+     * [节点跟进]
+     */
+    followUp() {
+      const that = this
+      const { row, choiceRow } = this
+      let data = choiceRow
+      if (!Object.keys(choiceRow).length) {
+        data = row // 没选节点，用项目信息进跟进
+      }
+      const { item_node_id, item_gantt_id } = data
+      const url = window.location.origin + `/nova/nodeFollowRecordsShowAction.do?action=showAdd&item_node_id=${item_node_id}&item_gantt_id=${item_gantt_id}`
+      const param = { item_node_id, item_gantt_id }
+      // eslint-disable-next-line
+      updateWin({ title: '节点跟进', url, width: 1500, height: 600, param, onClose() {}, fn() { that.f5(false) } })
+    },
+    /**
+     * [变更节点]
+     */
+    change() {
+      const that = this
+      const { choiceRow: { item_id, item_node_id } } = this
+      this.$store.dispatch('Ml/A_adjustmentNodeTest', { that, item_id, item_node_id })
+    },
+    /**
+     * [取消完成]
+     * @click {[choiceRow.item_node_id]}    选中节点
+     * @click {[choiceRow.is_complete]}  !0 节点已完成
+     */
+    cancel() {
+      const that = this
+      const { row: { business_group_id }, choiceRow: { item_node_id } } = this
+      const url = window.location.origin + `/nova/itemNodeShowAction.do?action=updateNode&id=${item_node_id}&business_group_id=${business_group_id}`
+      const param = { id: item_node_id, business_group_id }
+      // eslint-disable-next-line
+      updateWin({ title: '取消完成', width: 600, height: 200, url, param, onClose() {}, fn() { that.f5(false) } })
+    },
+    /**
+     * [调整完成比例]
+     */
+    tuneUp() {
+      const that = this
+      const { choiceRow: { node_complete_id } } = this
+      const url = window.location.origin + `/nova/itemNodecompleteDetailShowAction.do?action=showView&id=${node_complete_id}&type=1`
+      const param = { id: node_complete_id, type: 1 }
+      // eslint-disable-next-line
+      updateWin({ title: '调整完成比例', width: 1500, height: 600, url, param, onClose(data) {}, fn(data) { that.f5(false) } })
+    },
+    /**
+     * [点击某一行]
+     * @param {[Object]} row    行
+     * @param {[Object]} column 列
+     * @param {[Object]} event  事件
+     */
+    rowClick(row, column, event) {
+      this.choiceRow = row
+    },
+    /**
      * [查询]
      */
     clickSearch() {
@@ -163,57 +239,6 @@ export default {
       this.f5(true)
     },
     /**
-     * [打开平台页面]
-     * @param {[String]} title 页面名称
-     */
-    updateWin(title) {
-      const that = this
-      const { choiceRow } = that
-      // console.log(choiceRow, this.row)
-      if (Object.keys(choiceRow).length) {
-        const host = window.location.origin + '/nova/'
-        const urlObj = {
-          '节点跟进': 'nodeFollowRecordsShowAction.do?action=showAdd',
-          '完成节点': 'itemNodecompleteDetailShowAction.do?action=showAdd'
-        }
-        let param = {}
-        if (title === '节点跟进') {
-          /* 节点跟进 */
-          const { item_node_id } = choiceRow
-          param = { item_node_id }
-        } else if (title === '完成节点') {
-          /* 完成节点 */
-          const { item_node_id, node_name, plan_enddate, item_id } = choiceRow
-          param = { item_node_id, node_name, plan_enddate, item_id, complete_mode: 1 }
-        }
-        // eslint-disable-next-line
-        updateWin({
-          title,
-          url: host + urlObj[title],
-          width: 1500,
-          height: 600,
-          param,
-          onClose() {},
-          fn() {
-            /** 刷新：保持现在分页 **/
-            that.f5(false)
-          }
-        })
-      } else {
-        /* 没选中节点 */
-        this.$message({ message: '请先选择节点', type: 'warning' })
-      }
-    },
-    /**
-     * [点击某一行]
-     * @param {[Object]} row    行
-     * @param {[Object]} column 列
-     * @param {[Object]} event  事件
-     */
-    rowClick(row, column, event) {
-      this.choiceRow = row
-    },
-    /**
      * [刷新]
      */
     f5(reset = true) {
@@ -223,6 +248,7 @@ export default {
         pageObj[index] = { pagenum: 1, rownum: 100, pageCount: 0 }
         this.$store.commit('assignData', { name: 'pageObj', obj: pageObj, module: 'Ml' })
       }
+      this.choiceRow = {}
       /** 发起请求 **/
       this._request()
     },
