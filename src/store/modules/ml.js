@@ -56,6 +56,7 @@ const Ml = {
         const name = '统计列表'
         const obj = { filter_data: JSON.stringify(filter_data), type: 2, page: parseInt(pagenum) - 1, num: rownum, empid }
         const suc = function (res) {
+          console.log('res ----- ', res)
           const { data, nums, title, yjts } = res
           /* 给数据添加属性 */
           const list = Tool.mapData(data, yjts, 'nodes')

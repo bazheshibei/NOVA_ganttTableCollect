@@ -14,7 +14,7 @@ module.exports = {
     proxyTable: {
       '/api': {
         target: 'http://10.10.0.226:8080/nova', // 晓东
-        // target: 'http://192.168.9.129:8083/nova', // 孜祎
+        // target: 'http://192.168.9.129:8081/nova', // 孜祎
         secure: false, // proxy https
         changeOrigin: true,
         pathRewrite: {
@@ -64,7 +64,7 @@ module.exports = {
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../itemganttsummary'),
-    assetsSubDirectory: 'static',
+    assetsSubDirectory: 'itemGanttSummaryShow',
     assetsPublicPath: '/nova/pages/itemganttsummary',
 
     /**

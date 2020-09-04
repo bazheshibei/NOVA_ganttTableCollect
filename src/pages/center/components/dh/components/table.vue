@@ -2,11 +2,13 @@
 <!-- 表格：大货 -->
 
 <template>
-  <div ref="comTable">
 
-    <el-table :data="tableData_1" border :height="tableHeight" :highlight-current-row="true"
+  <div>
+
+    <el-table :data="tableData_1" border :max-height="tableHeight" :highlight-current-row="true"
       :cell-style="cellStyle" @expand-change="showMore" @row-click="rowClick"
     >
+    <!--  -->
       <!-- 折叠内容 -->
       <el-table-column type="expand" width="30">
         <template slot-scope="props">
@@ -19,7 +21,7 @@
           {{scope.row.index + 1}}
         </template>
       </el-table-column>
-      <el-table-column label="项目名称" prop="item_name" width="120"></el-table-column>
+      <el-table-column label="项目名称" prop="item_name" min-width="120"></el-table-column>
       <el-table-column label="项目季节" prop="season_name" width="120"></el-table-column>
       <el-table-column label="服装品类" prop="type_name" width="120"></el-table-column>
       <el-table-column label="款式名称" prop="style_name" width="120"></el-table-column>
@@ -37,8 +39,8 @@
       <el-table-column label="提报人" prop="reporter" width="100"></el-table-column>
       <el-table-column label="创建时间" width="100">
         <template slot-scope="scope">
-          <p>{{scope.row.report_time.split(' ')[0]}}</p>
-          <p>{{scope.row.report_time.split(' ')[1]}}</p>
+          <p v-if="scope.row.report_time">{{scope.row.report_time.split(' ')[0]}}</p>
+          <p v-if="scope.row.report_time">{{scope.row.report_time.split(' ')[1]}}</p>
         </template>
       </el-table-column>
       <el-table-column label="下单时间" prop="order_time" width="100"></el-table-column>
@@ -71,19 +73,16 @@
 import { mapState } from 'vuex'
 import ComTable2 from './table2.vue' // 表格：大货_折叠部分
 export default {
+  props: ['tableHeight'],
   components: { ComTable2 },
   created() {
     if (!this.tableData_1.length) {
       /** 请求：表格基础数据 **/
       this.$store.dispatch('Dh/A_tableData')
     }
-    /** 计算：表格高度 **/
-    this._countHeight()
   },
   data() {
-    return {
-      tableHeight: 0 // 表格高度
-    }
+    return {}
   },
   computed: {
     ...mapState('Dh', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading'])
@@ -143,26 +142,6 @@ export default {
         /** 请求：表格折叠数据 **/
         this.$store.dispatch('Dh/A_tableOtherData', { row })
       }
-    },
-    /**
-     * [计算：表格高度]
-     */
-    _countHeight() {
-      const that = this
-      let i = 0
-      const timer = setInterval(function () {
-        if (Object.keys(that.$refs).length) {
-          const { comTable } = that.$refs
-          if (comTable.clientHeight) {
-            that.tableHeight = comTable.clientHeight
-            clearInterval(timer)
-          }
-        }
-        if (i > 500) {
-          clearInterval(timer)
-        }
-        i++
-      }, 100)
     }
   }
 }

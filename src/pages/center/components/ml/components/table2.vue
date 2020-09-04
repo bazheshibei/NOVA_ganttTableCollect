@@ -2,7 +2,7 @@
 <!-- 表格：面料_折叠部分 -->
 
 <template>
-  <div class="tableContent">
+  <div class="tableContent" :style="btnLineStyle">
 
     <!-- 按钮组 -->
     <div class="btnLine" :style="btnLineStyle">
@@ -19,7 +19,7 @@
         <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id || !choiceRow.node_complete_id" @click="tuneUp">调整完成比例</el-button>
       </div>
       <div class="searchBox">
-        <el-input v-model="node_name" size="mini" placeholder="请输入节点名称"></el-input>
+        <el-input v-model="node_name" size="mini" placeholder="请输入节点名称" @change="clickSearch"></el-input>
         <el-select v-model="status" filterable collapse-tags placeholder="请选择" size="mini">
           <el-option class="comSelectOptions" label="待完成" value="1"></el-option>
           <el-option class="comSelectOptions" label="已完成" value="2"></el-option>
@@ -38,41 +38,44 @@
         </template>
       </el-table-column>
       <!-- 节点名称 -->
-      <el-table-column label="节点名称" prop="node_name" width="200"></el-table-column>
+      <el-table-column label="节点名称" prop="node_name" width="150"></el-table-column>
       <!-- 计划完成日期 -->
-      <el-table-column label="计划完成日期" prop="plan_enddate" width="120"></el-table-column>
+      <el-table-column label="计划完成日期" prop="plan_enddate" width="100"></el-table-column>
       <!-- 节点状态 -->
-      <el-table-column label="节点状态" width="120">
+      <el-table-column label="节点状态" width="100">
         <template slot-scope="scope">
           <p v-html="scope.row.nodeTypeText"></p>
         </template>
       </el-table-column>
       <!-- 完成方式 -->
-      <!-- <el-table-column label="完成方式" width="120">
+      <!-- <el-table-column label="完成方式" width="100">
         <template slot-scope="scope">
           {{{ 1: '手动', 2: '自动' }[scope.row.completion_method] || ''}}
         </template>
       </el-table-column> -->
       <!-- 延期/剩余天数 -->
-      <el-table-column label="延期/剩余天数" width="120">
+      <el-table-column label="延期/剩余天数" width="100">
         <template slot-scope="scope">
           <p v-html="scope.row.timeText"></p>
         </template>
       </el-table-column>
       <!-- 预警状态 -->
-      <el-table-column label="预警状态" width="120">
+      <el-table-column label="预警状态" width="100">
         <template slot-scope="scope">
           <p v-html="scope.row.warningText"></p>
         </template>
       </el-table-column>
       <!-- 实际完成日期 -->
-      <el-table-column label="实际完成日期" prop="actual_enddate" width="120"></el-table-column>
+      <el-table-column label="实际完成日期" prop="actual_enddate" width="100"></el-table-column>
       <!-- 完成人 -->
-      <el-table-column label="完成人" prop="complete_employeename" width="120"></el-table-column>
+      <el-table-column label="完成人" prop="complete_employeename" width="100"></el-table-column>
       <!-- 审核状态 -->
-      <el-table-column label="审核状态" width="120">
+      <el-table-column label="审核状态" width="100">
         <template slot-scope="scope">
-          {{{ 1: '完成待审核', 2: '审核通过', 3: '审核驳回' }[scope.row.audit_status] || '无需审核'}}
+          <span v-if="String(scope.row.audit_status) === '2'">
+            {{scope.row.next_audit_stage}}
+          </span>
+          <span v-else>{{auditText[scope.row.audit_status] || '无需审核'}}</span>
         </template>
       </el-table-column>
       <!-- 节点变更记录 -->
@@ -88,7 +91,7 @@
     </el-table>
 
     <!-- 分页 -->
-    <div class="paginationBox" :style="{ width: paginationWidth + 'px' }">
+    <div class="paginationBox" :style="btnLineStyle">
       <el-pagination :disabled="loading2" class="comPagination table2_comPagination" :page-size="pageObj_2.rownum" :page-sizes="[10, 20, 30, 50, 100]" :total="pageObj_2.pageCount" :current-page="pageObj_2.pagenum"
         layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
         @size-change="pageChange('rownum', $event)" @current-change="pageChange('pagenum', $event)"
@@ -106,15 +109,21 @@ export default {
   props: ['row'], // 此条数据
   data() {
     return {
-      paginationWidth: 0, // 分页容器宽度
-      btnLineStyle: {}, //   按钮组样式
-      choiceRow: {}, //      选中的行
-      node_name: '', //      搜索：节点名称
-      status: '' //          搜索：节点状态
+      auditText: {
+        '1': '草稿中',
+        '2': '完成待审核',
+        '3': '审核通过',
+        '4': '审核驳回',
+        '5': '无审核，直接完成',
+        '6': '撤销审核'
+      },
+      btnLineStyle: {}, // 按钮组样式
+      choiceRow: {}, //    选中的行
+      node_name: '', //    搜索：节点名称
+      status: '' //        搜索：节点状态
     }
   },
   created() {
-    this.paginationWidth = window.document.documentElement.clientWidth - 45
     const btnLineStyle = { width: (window.document.documentElement.clientWidth - 60) + 'px' }
     this.btnLineStyle = btnLineStyle
   },
@@ -280,8 +289,7 @@ export default {
 <style scoped>
 /*** 折叠内容 ***/
 .tableContent {
-  padding: 0 30px;
-  background: #fdf5e6;
+  margin-left: 30px;
 }
 .btnLine { /* 顶部按钮行 */
   width: 100%;
@@ -309,19 +317,5 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-}
-</style>
-
-<style>
-/*** 右侧搜索区域 ***/
-/* .btnLine .el-input > input, .btnLine .el-select > input {
-  background: #fdf5e6 !important;
-} */
-/*** 分页 ***/
-.table2_comPagination > .btn-prev, .table2_comPagination > .el-pager > .number, .table2_comPagination > .btn-next {
-  background: #fdf5e6 !important;
-}
-.table2_comPagination > .el-pagination__jump > .el-input > input, .table2_comPagination > .el-pagination__sizes > .el-select > .el-input > input {
-  background: #fdf5e6 !important;
 }
 </style>

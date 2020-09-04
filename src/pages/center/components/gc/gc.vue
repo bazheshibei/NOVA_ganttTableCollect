@@ -20,7 +20,7 @@
     </div>
 
     <!-- 表格组件 -->
-    <com-table :style="tableStyle"></com-table>
+    <com-table :style="tableStyle" :tableHeight="tableHeight"></com-table>
 
     <!-- 分页 -->
     <div class="paginationBox" ref="bottomBox">
@@ -85,6 +85,7 @@ export default {
   components: { ComTable, ComAdvancedQuery },
   data() {
     return {
+      tableHeight: 0,
       tableStyle: {},
       /* 弹出层 */
       dialogVisible_submit: false, // 是否显示弹出层
@@ -109,9 +110,6 @@ export default {
     ...mapState('Gc', ['pagenum', 'rownum', 'pageCount', 'item_id', 'item_gantt_id', 'item_gantt_detail_id', 'disabledChange', 'isChangeNodes', 'isEdit', 'helpText'])
   },
   methods: {
-    help() {
-      // get 请求
-    },
     /**
      * [编辑]
      */
@@ -264,6 +262,7 @@ export default {
           if (page.clientHeight && bottomBox.clientHeight) {
             const num = page.clientHeight - bottomBox.clientHeight - 40
             that.tableStyle = { height: num + 'px' }
+            that.tableHeight = num
             clearInterval(timer)
           }
         }
@@ -302,7 +301,7 @@ export default {
 /*** 分页 ***/
 .paginationBox {
   height: 34px;
-  margin: 0 15px;
+  margin: 0 30px;
   display: flex;
   align-items: center;
   justify-content: flex-end;

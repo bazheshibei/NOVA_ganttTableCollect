@@ -111,6 +111,10 @@ export default {
 }
 
 /*** tabs ***/
+.comTabs {
+  border: 0 !important;
+  box-shadow: none !important;
+}
 .comTabs .el-tabs__item { /* tab 顶部 */
   height: 30px !important;
   line-height: 30px !important;
