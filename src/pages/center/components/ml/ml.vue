@@ -33,7 +33,7 @@
     <com-advancedQuery></com-advancedQuery>
 
     <!-- 弹出层：帮助 -->
-    <el-dialog class="submitDialog" title="帮助" :visible.sync="dialogVisible_help" width="40%">
+    <el-dialog title="帮助" :visible.sync="dialogVisible_help" width="40%">
       <p v-html="helpText"></p>
     </el-dialog>
 
@@ -163,12 +163,6 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.topBtn {
-  margin-left: 10px;
-}
-.topBtn:last-child {
-  margin-right: 10px;
-}
 
 /*** 分页 ***/
 .paginationBox {
@@ -190,11 +184,5 @@ export default {
 }
 .dialogLine > span {
   white-space: nowrap;
-}
-</style>
-<style>
-/*** 弹出层 ***/
-.submitDialog > .el-dialog > .el-dialog__body {
-  padding: 20px !important;
 }
 </style>

@@ -100,105 +100,13 @@ export default {
 <style>
 /*** 单元格：计划、实际、状态 ***/
 .comCellBox {
-  display: flex;
-  justify-content: center;
+  display: flex !important;
+  justify-content: center !important;
 }
 .comCell {
-  text-align: left;
+  text-align: left !important;
 }
 .comCell > p {
-  white-space: nowrap;
-}
-
-/*** tabs ***/
-.comTabs {
-  border: 0 !important;
-  box-shadow: none !important;
-}
-.comTabs .el-tabs__item { /* tab 顶部 */
-  height: 30px !important;
-  line-height: 30px !important;
-  font-size: 12px !important;
-  padding: 0 10px !important;
-}
-.comTabs .el-tabs__content { /* tab 内容 */
-  padding: 0 !important;
-  position: absolute;
-  top: 30px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-/*** 模块刷新 ***/
-.f5 {
-  color: #909399;
-  cursor: pointer;
-  padding: 0 6px;
-}
-
-/*** 表格字体 ***/
-.el-table {
-  font-size: 12px !important;
-}
-/*** 重置表头单元格 ***/
-.el-table > div th, .el-table > div th > .cell {
-  padding: 0 !important;
-}
-.el-table > div th > .cell .thText {
-  padding: 5px 10px;
-}
-th > .cell, th > .cell .thText {
-  text-align: center;
-}
-/*** 表头输入内容 ***/
-.thActive {
-  color: #000000 !important;
-  /* color: #ffffff;
-  background: #409EFF; */
-}
-/*** 单元格 ***/
-td {
-  padding: 0 !important;
-}
-.cell p {
-  line-height: 16px !important;
-  margin: 4px 0 !important;
-}
-td > .cell {
-  text-align: center;
-}
-
-/*** 搜索 ***/
-.el-popover {
-  padding: 6px;
-}
-.el-popover > div > input {
-  height: 26px;
-  font-size: 12px !important;
-  display: flex;
-  align-items: center;
-}
-.el-popover > div > .el-input__suffix { /* input 中删除按钮 */
-  margin-top: -6px;
-}
-
-/*** 下拉框 ***/
-.comSelectOptions { /* 单个选项 */
-  height: 25px !important;
-  font-size: 12px !important;
-  line-height: 25px !important;
-  padding: 0 10px !important;
-}
-
-/*** 分页 ***/
-.comPagination {
-  padding: 0;
-}
-.comPagination > .el-pagination__sizes { /* 总条数 */
-  margin: 0 0 0 30px;
-}
-.comPagination > .el-pagination__sizes > .el-select > .el-input--suffix { /* 总条数 */
-  margin-right: 0;
+  white-space: nowrap !important;
 }
 </style>

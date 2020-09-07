@@ -83,11 +83,14 @@ export default {
      * [单元格样式]
      */
     cellStyle({ row, column, rowIndex, columnIndex }) {
+      if (columnIndex < 2) {
+        return { color: '#2e6e9e', fontWeight: 'bold', background: '#dfeffc url(itemGanttSummaryShow/images/ui-bg_glass_85_dfeffc_1x400.png) 100% 100% repeat-x' }
+      }
       if (column.columnKey) {
         for (let i = 0; i < row.nodes.length; i++) {
           const { node_code, is_show_warning } = row.nodes[i]
           if (node_code === column.columnKey && is_show_warning) {
-            return { background: '#b4eaf9' }
+            return { background: '#dfeffc url(itemGanttSummaryShow/images/ui-bg_glass_85_dfeffc_1x400.png) 100% 100% repeat-x' }
           }
         }
       }

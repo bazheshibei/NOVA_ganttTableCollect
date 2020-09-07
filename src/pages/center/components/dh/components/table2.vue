@@ -25,13 +25,17 @@
           <el-option class="comSelectOptions" label="已完成" value="1"></el-option>
           <el-option class="comSelectOptions" label="全部" value=""></el-option>
         </el-select>
-        <el-button type="primary" size="mini" plain @click="clickSearch">查询</el-button>
-        <el-button type="primary" size="mini" plain @click="clickReset">重置</el-button>
+        <div>
+          <el-button type="primary" size="mini" plain @click="clickSearch">查询</el-button>
+          <el-button type="primary" size="mini" plain @click="clickReset">重置</el-button>
+        </div>
       </div>
     </div>
 
     <!-- 表格 -->
-    <el-table :data="tableData_2" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..." @row-click="rowClick">
+    <el-table :data="tableData_2" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..."
+      :cell-style="cellStyle" @row-click="rowClick"
+    >
       <el-table-column width="45">
         <template slot-scope="scope">
           {{scope.row.index + 1}}
@@ -280,6 +284,14 @@ export default {
       loading[index] = true
       /** 请求：表格折叠数据 **/
       this.$store.dispatch('Dh/A_tableOtherData', { row })
+    },
+    /**
+     * [单元格样式]
+     */
+    cellStyle({ row, column, rowIndex, columnIndex }) {
+      if (columnIndex < 1) {
+        return { color: '#2e6e9e', fontWeight: 'bold', background: '#dfeffc url(itemGanttSummaryShow/images/ui-bg_glass_85_dfeffc_1x400.png) 100% 100% repeat-x' }
+      }
     }
   }
 }
@@ -296,10 +308,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-.btnLine .el-button, .btnLine .el-input, .btnLine .el-select {
-  margin-top: 4px;
-  margin-bottom: 4px;
 }
 .searchBox { /* 右侧搜索区域 */
   display: flex;

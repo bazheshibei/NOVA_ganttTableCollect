@@ -36,7 +36,7 @@
     <com-advancedQuery></com-advancedQuery>
 
     <!-- 弹出层：提交/撤销选节点 || 填写撤销说明 -->
-    <el-dialog class="submitDialog" :visible.sync="dialogVisible_submit" width="50%" :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog :visible.sync="dialogVisible_submit" width="50%" :close-on-click-modal="false" :close-on-press-escape="false">
       <div class="dialogLine" v-if="itemGanttSummary.length > 1">
         <span>{{{ '1': '提交', '2': '撤销' }[audit_status]}}节点：</span>
         <el-radio v-for="(item, index) in itemGanttSummary" :key="'radio_' + index" v-model="radio" :label="index">{{{ '1': '投产前节点', '2': '预排产节点' }[item.gantt_detail_type]}}</el-radio>
@@ -54,7 +54,7 @@
     </el-dialog>
 
     <!-- 弹出层：批量变更节点 -->
-    <el-dialog class="submitDialog" :visible.sync="dialogVisible_change" width="40%" :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog :visible.sync="dialogVisible_change" width="40%" :close-on-click-modal="false" :close-on-press-escape="false">
       <div class="dialogLine">
         <p>{{messageChange}}</p>
       </div>
@@ -70,7 +70,7 @@
     </el-dialog>
 
     <!-- 弹出层：帮助 -->
-    <el-dialog class="submitDialog" title="帮助" :visible.sync="dialogVisible_help" width="40%">
+    <el-dialog title="帮助" :visible.sync="dialogVisible_help" width="40%">
       <p v-html="helpText"></p>
     </el-dialog>
 
@@ -291,12 +291,6 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.topBtn {
-  margin-left: 10px;
-}
-.topBtn:last-child {
-  margin-right: 10px;
-}
 
 /*** 分页 ***/
 .paginationBox {
@@ -318,11 +312,5 @@ export default {
 }
 .dialogLine > span {
   white-space: nowrap;
-}
-</style>
-<style>
-/*** 弹出层 ***/
-.submitDialog > .el-dialog > .el-dialog__body {
-  padding: 20px !important;
 }
 </style>

@@ -50,39 +50,39 @@ const Dh = {
      * [请求：表格基础数据]
      */
     A_tableData({ state }) {
-      // const res = JSON.parse(localStorage.getItem('大货汇总'))
-      // const { data, nums, title, yjts } = res
-      // /* 给数据添加属性 */
-      // const list = Tool.mapData(data, yjts, 'nodes')
-      // // console.log('list ----- ', res)
-      // /* 赋值 */
-      // state.tableData_1 = list //  表格数据
-      // state.pageCount = nums //    总条数
-      // state.tableNodes = title //  列：表格外层
-      // state.loadingPage = false // 隐藏加载动画
+      const res = JSON.parse(localStorage.getItem('大货汇总'))
+      const { data, nums, title, yjts } = res
+      /* 给数据添加属性 */
+      const list = Tool.mapData(data, yjts, 'nodes')
+      // console.log('list ----- ', res)
+      /* 赋值 */
+      state.tableData_1 = list //  表格数据
+      state.pageCount = nums //    总条数
+      state.tableNodes = title //  列：表格外层
+      state.loadingPage = false // 隐藏加载动画
 
-      const { pagenum, rownum, loadingPage, filter_data } = state
-      if (!loadingPage) {
-        state.loadingPage = true
-        // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
-        const empid = ''
-        /* 发起请求 */
-        const name = '统计列表'
-        const obj = { filter_data: JSON.stringify(filter_data), type: 1, page: parseInt(pagenum) - 1, num: rownum, empid }
-        const suc = function (res) {
-          // console.log(res)
-          localStorage.setItem('大货汇总', JSON.stringify(res))
-          const { data, nums, title, yjts } = res
-          /* 给数据添加属性 */
-          const list = Tool.mapData(data, yjts, 'nodes')
-          /* 赋值 */
-          state.tableData_1 = list //  表格数据
-          state.pageCount = nums //    总条数
-          state.tableNodes = title //  列：表格外层
-          state.loadingPage = false // 隐藏加载动画
-        }
-        Api({ name, obj, suc })
-      }
+      // const { pagenum, rownum, loadingPage, filter_data } = state
+      // if (!loadingPage) {
+      //   state.loadingPage = true
+      //   // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
+      //   const empid = ''
+      //   /* 发起请求 */
+      //   const name = '统计列表'
+      //   const obj = { filter_data: JSON.stringify(filter_data), type: 1, page: parseInt(pagenum) - 1, num: rownum, empid }
+      //   const suc = function (res) {
+      //     // console.log(res)
+      //     localStorage.setItem('大货汇总', JSON.stringify(res))
+      //     const { data, nums, title, yjts } = res
+      //     /* 给数据添加属性 */
+      //     const list = Tool.mapData(data, yjts, 'nodes')
+      //     /* 赋值 */
+      //     state.tableData_1 = list //  表格数据
+      //     state.pageCount = nums //    总条数
+      //     state.tableNodes = title //  列：表格外层
+      //     state.loadingPage = false // 隐藏加载动画
+      //   }
+      //   Api({ name, obj, suc })
+      // }
     },
     /**
      * [请求：表格折叠数据]

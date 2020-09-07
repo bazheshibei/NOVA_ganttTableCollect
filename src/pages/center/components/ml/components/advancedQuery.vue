@@ -8,7 +8,7 @@
     <br>
     <br>
     <div class="comContentBox" :style="styleObj">
-      <div class="lineBox" v-for="(item, index) in submitVal" :key="'line_' + index">
+      <div class="advancedQueryBox" v-for="(item, index) in submitVal" :key="'line_' + index">
         <!-- 表头 -->
         <el-select class="com_1" size="mini" v-model="submitVal[index].typecode" @change="_proving">
           <el-option class="comSelectOptions" v-for="item in selectObj" :key="'cate_' + item.value" :label="item.label" :value="item.value"></el-option>
@@ -184,12 +184,12 @@ export default {
 .comContentBox {
   flex: 1;
 }
-.lineBox {
+.advancedQueryBox {
   width: 100%;
   margin-bottom: 10px;
   display: flex;
 }
-.lineBox:last-child {
+.advancedQueryBox:last-child {
   margin-bottom: 0;
 }
 
