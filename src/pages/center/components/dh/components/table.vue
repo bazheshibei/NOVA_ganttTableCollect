@@ -5,7 +5,7 @@
 
   <div>
 
-    <el-table :data="tableData_1" border :max-height="tableHeight" :highlight-current-row="true"
+    <el-table class="pageComTable" :data="tableData_1" border :max-height="tableHeight" :highlight-current-row="true"
       :cell-style="cellStyle" @expand-change="showMore" @row-click="rowClick"
     >
       <!-- 折叠内容 -->
@@ -45,12 +45,12 @@
       <el-table-column label="下单时间" prop="order_time" width="100"></el-table-column>
       <el-table-column label="客人交期" prop="deliver_date" width="100"></el-table-column>
       <!-- 节点列 -->
-      <el-table-column v-for="(node, nodeKey) in tableNodes" :key="'node_' + nodeKey" :label="node.node_name" :column-key="node.node_code" align="center" min-width="180">
+      <el-table-column v-for="(node, nodeKey) in tableNodes" :key="'node_' + nodeKey" :label="node.node_name" :column-key="node.node_code" align="center" width="140">
         <template slot-scope="scope">
-          <div class="comCellBox" v-for="(item, index) in scope.row.nodes" :key="nodeKey + '_' + index">
+          <div class="comCellBox" v-for="(item, index) in scope.row.nodes" :key="nodeKey + '_' + index" :title="scope.row.item_name">
             <div class="comCell" v-if="item.node_code === node.node_code">
-              <p>计划：{{item.plan_enddate}}</p>
-              <p>实际：{{item.actual_enddate === null || item.actual_enddate === '' ? '--' : item.actual_enddate}}</p>
+              <p>计划：{{item.plan_enddate.split(' ')[0]}}</p>
+              <p>实际：{{item.actual_enddate === null || item.actual_enddate === '' ? '--' : item.actual_enddate.split(' ')[0]}}</p>
               <p>
                 状态：<span v-html="item.nodeTypeText"></span>
                 <i class="el-icon-warning" v-if="item.is_show_warning" style="color: #F56C6C;"></i>

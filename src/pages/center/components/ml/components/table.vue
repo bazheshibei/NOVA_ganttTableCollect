@@ -24,9 +24,8 @@
       <el-table-column label="服装品类" prop="type_name" width="120"></el-table-column>
       <el-table-column label="款式名称" prop="style_name" width="120"></el-table-column>
       <el-table-column label="业务组" prop="group_name" width="120"></el-table-column>
-      <el-table-column label="物料名称" prop="material_name" width="120"></el-table-column>
+      <el-table-column label="物料名称" prop="material_name" width="220"></el-table-column>
       <el-table-column label="物料颜色" prop="color_name" width="120"></el-table-column>
-      <el-table-column label="审核状态" prop="audit_status" width="100"></el-table-column>
       <el-table-column label="提报人" prop="reporter" width="100"></el-table-column>
       <el-table-column label="创建时间" width="100">
         <template slot-scope="scope">
@@ -37,12 +36,12 @@
       <el-table-column label="下单时间" prop="order_time" width="100"></el-table-column>
       <el-table-column label="客人交期" prop="deliver_date" width="100"></el-table-column>
       <!-- 节点列 -->
-      <el-table-column v-for="(node, nodeKey) in tableNodes" :key="'node_' + nodeKey" :label="node.node_name" :column-key="node.node_code" align="center" min-width="180">
+      <el-table-column v-for="(node, nodeKey) in tableNodes" :key="'node_' + nodeKey" :label="node.node_name" :column-key="node.node_code" align="center" width="140">
         <template slot-scope="scope">
-          <div class="comCellBox" v-for="(item, index) in scope.row.nodes" :key="nodeKey + '_' + index">
+          <div class="comCellBox" v-for="(item, index) in scope.row.nodes" :key="nodeKey + '_' + index" :title="scope.row.item_name">
             <div class="comCell" v-if="item.node_code === node.node_code">
-            <p>计划：{{item.plan_enddate}}</p>
-            <p>实际：{{item.actual_enddate === null || item.actual_enddate === '' ? '--' : item.actual_enddate}}</p>
+            <p>计划：{{item.plan_enddate.split(' ')[0]}}</p>
+            <p>实际：{{item.actual_enddate === null || item.actual_enddate === '' ? '--' : item.actual_enddate.split(' ')[0]}}</p>
             <p>
               状态：<span v-html="item.nodeTypeText"></span>
               <i class="el-icon-warning" v-if="item.is_show_warning" style="color: #F56C6C;"></i>
@@ -102,15 +101,10 @@ export default {
      * @param {[Object]} event  事件
      */
     rowClick(row, column, event) {
-      const { item_id, item_gantt_id, item_gantt_detail_id, audit_status_type } = row
-      let isEdit = false
-      if (audit_status_type === '1' || audit_status_type === '4' || audit_status_type === '5') {
-        isEdit = true
-      }
+      const { item_id, item_gantt_id, item_gantt_detail_id } = row
       this.$store.commit('saveData', { name: 'item_id', obj: item_id, module: 'Ml' })
       this.$store.commit('saveData', { name: 'item_gantt_id', obj: item_gantt_id, module: 'Ml' })
       this.$store.commit('saveData', { name: 'item_gantt_detail_id', obj: item_gantt_detail_id, module: 'Ml' })
-      this.$store.commit('saveData', { name: 'isEdit', obj: isEdit, module: 'Ml' })
     },
     /**
      * [展示折叠内容]

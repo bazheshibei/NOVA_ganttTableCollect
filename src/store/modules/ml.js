@@ -15,7 +15,6 @@ const Ml = {
     item_id: '', //              项目ID
     item_gantt_id: '', //        项目甘特表主键id
     item_gantt_detail_id: '', // 甘特表明细主键id
-    isEdit: false, //            是否可以编辑
     helpText: '', //             帮助文字
     /* 高级查询 */
     isDialog: false, //          是否显示
@@ -104,7 +103,7 @@ const Ml = {
     /**
      * [请求：节点完成前验证]
      */
-    A_testItemNodeStatus({ state }, { item_id, item_node_id, completion_method, index }) {
+    A_testItemNodeStatus({ state }, { item_id, item_node_id, completion_method, index, that }) {
       const name = '节点完成前验证'
       const obj = { item_node_id }
       const suc = function (res) {
@@ -123,7 +122,7 @@ const Ml = {
             url = url + path + `?action=${action}&id=${node_complete_id}`
           }
           // eslint-disable-next-line
-          updateWin({ title: '完成节点', width: 1700, height: 700, url, param, onClose() {}, fn() {} })
+          updateWin({ title: '完成节点', width: 1700, height: 700, url, param, onClose() {}, fn() { that.f5(false) } })
         }
         /* 关闭：加载动画 */
         state.loading[index] = false

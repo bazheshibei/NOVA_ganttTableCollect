@@ -6,18 +6,18 @@
 
     <div class="topBtnLine">
       <div>
-        <el-button class="topBtn" type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
-        <el-button class="topBtn" type="primary" size="mini" @click="f5">刷新</el-button>
-        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || !isEdit" @click="edit">编辑</el-button>
+        <el-button type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
+        <el-button type="primary" size="mini" @click="f5">刷新</el-button>
+        <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="edit">编辑</el-button>
       </div>
       <div>
-        <el-button class="topBtn" type="primary" size="mini" plain>导出</el-button>
-        <el-button class="topBtn" type="primary" size="mini" plain :disabled="!helpText" @click="dialogVisible_help = true">帮助</el-button>
+        <el-button type="primary" size="mini" plain>导出</el-button>
+        <el-button type="primary" size="mini" plain :disabled="!helpText" @click="dialogVisible_help = true">帮助</el-button>
       </div>
     </div>
 
     <!-- 表格组件 -->
-    <com-table :style="tableStyle" :tableHeight="tableHeight"></com-table>
+    <com-table :style="tableStyle" :tableHeight="tableHeight" style="padding-right: 30px;"></com-table>
 
     <!-- 分页 -->
     <div class="paginationBox" ref="bottomBox">
@@ -33,7 +33,7 @@
     <com-advancedQuery></com-advancedQuery>
 
     <!-- 弹出层：帮助 -->
-    <el-dialog title="帮助" :visible.sync="dialogVisible_help" width="40%">
+    <el-dialog class="helpComDialog" title="帮助" :visible.sync="dialogVisible_help" width="95%">
       <p v-html="helpText"></p>
     </el-dialog>
 
@@ -66,7 +66,7 @@ export default {
     this.$store.dispatch('Ml/A_getHelpText')
   },
   computed: {
-    ...mapState('Ml', ['pagenum', 'rownum', 'pageCount', 'item_id', 'item_gantt_id', 'item_gantt_detail_id', 'isEdit', 'helpText'])
+    ...mapState('Ml', ['pagenum', 'rownum', 'pageCount', 'item_id', 'item_gantt_id', 'item_gantt_detail_id', 'helpText'])
   },
   methods: {
     /**
@@ -157,8 +157,9 @@ export default {
 
 /*** 顶部按钮 ***/
 .topBtnLine {
-  width: 100%;
+  width: calc(100% - 30px);
   height: 40px;
+  margin-right: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -184,5 +185,33 @@ export default {
 }
 .dialogLine > span {
   white-space: nowrap;
+}
+</style>
+
+<style>
+.helpComDialog > .el-dialog {
+  border-radius: 15px !important;
+  overflow: hidden;
+}
+.helpComDialog > .el-dialog > .el-dialog__header {
+  padding: 10px 20px !important;
+  background: #77a3d3 !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__header > .el-dialog__title {
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__header > .el-dialog__headerbtn {
+  top: 15px !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__header > .el-dialog__headerbtn > .el-dialog__close {
+  color: #000000 !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__body {
+  padding: 20px !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__body > p {
+  max-height: 500px !important;
+  overflow-y: auto !important;
 }
 </style>

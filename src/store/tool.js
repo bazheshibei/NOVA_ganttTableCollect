@@ -17,6 +17,8 @@ Tool.mapData = function (list, yjts, name = '') {
   const now = new Date(`${year}-${month}-${day}`).getTime() // 毫秒数
   /* 循环数据 */
   list.map(function (item, index) {
+    const { actual_enddate } = item
+    const completeTime = typeof actual_enddate === 'string' && actual_enddate ? new Date(actual_enddate).getTime() : now
     item.index = index
     if (name) {
       let arr = []
@@ -25,25 +27,31 @@ Tool.mapData = function (list, yjts, name = '') {
         arr = item[name]
       }
       arr.map(function (val) {
-        return that._map(val, now, yjts)
+        return that._map(val, completeTime, yjts)
       })
       return arr
     } else {
       /* 处理自身 */
-      return that._map(item, now, yjts)
+      return that._map(item, completeTime, yjts)
     }
   })
   return list
 }
 
-Tool._map = function (item, now, yjts) {
+/**
+ * [处理节点]
+ * @param  {[Object]} item         节点
+ * @param  {[Int]}    completeTime 毫秒数（完成时间 || 当前时间）
+ * @param  {[String]} yjts         预警时间
+ * @return {[Object]} item         添加属性后的节点
+ */
+Tool._map = function (item, completeTime, yjts) {
   /* ----- 延期/剩余天数 ----- */
-  // const num = (new Date(item.plan_enddate).getTime() - now) / (1000 * 60 * 60 * 24) // 相差天数：计划日期 - 当前日期
-  const num = (now - new Date(item.plan_enddate).getTime()) / (1000 * 60 * 60 * 24) // 超期天数：当前日期 - 计划日期
+  const num = (completeTime - new Date(item.plan_enddate).getTime()) / (1000 * 60 * 60 * 24) // 超期天数：当前日期 - 计划日期
   if (num > 0) {
     item.timeText = `<span style="color: red;">${num}</span>` // 延期天数
   } else {
-    item.timeText = `<span>${num}</span>` // 剩余天数
+    item.timeText = `<span>${Math.abs(num)}</span>` // 剩余天数
   }
   /* ----- 节点状态 && 预警状态 ----- */
   if (item.actual_enddate !== null && item.actual_enddate) {
@@ -67,7 +75,7 @@ Tool._map = function (item, now, yjts) {
     } else {
       item.nodeTypeText = `<span style="color: #909399;">未完成</span>`
       /* 预警状态：未完成 -> 倒计时预警 */
-      if (yjts && num >= parseInt(yjts)) {
+      if (yjts && num >= parseInt(Math.abs(yjts))) {
         item.warningText = '<span style="color: #F56C6C;">预警</span>' // 倒计时预警：超期天数 >= 预警时间
         item.is_show_warning = true
       } else {

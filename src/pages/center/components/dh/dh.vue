@@ -6,21 +6,31 @@
 
     <div class="topBtnLine">
       <div>
-        <el-button class="topBtn" type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
-        <el-button class="topBtn" type="primary" size="mini" @click="f5">刷新</el-button>
-        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || !isEdit" @click="edit">编辑</el-button>
-        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(1)">提交审核</el-button>
-        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(2)">撤销审核</el-button>
-        <el-button class="topBtn" type="primary" size="mini" :disabled="!item_gantt_id || disabledChange[item_gantt_id] || !isChangeNodes" @click="nodeChange">批量变更节点</el-button>
+        <el-button type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
+        <el-button type="primary" size="mini" @click="f5">刷新</el-button>
+        <el-button type="primary" size="mini" :disabled="!item_gantt_id || !isEdit" @click="edit">编辑</el-button>
+        <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(1)">提交审核</el-button>
+        <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(2)">撤销审核</el-button>
+        <!-- <el-button type="primary" size="mini" :disabled="!item_gantt_id || disabledChange[item_gantt_id] || !isChangeNodes" @click="nodeChange">批量变更节点</el-button> -->
+
+        <el-dropdown size="mini" trigger="click" @command="dropdown">
+          <el-button type="primary" size="mini">
+            变更相关<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="nodeChange" :disabled="!item_gantt_id || disabledChange[item_gantt_id] || !isChangeNodes">批量变更节点</el-dropdown-item>
+            <el-dropdown-item command="history">历史变更记录</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </div>
       <div>
-        <el-button class="topBtn" type="primary" size="mini" plain>导出</el-button>
-        <el-button class="topBtn" type="primary" size="mini" plain :disabled="!helpText" @click="dialogVisible_help = true">帮助</el-button>
+        <el-button type="primary" size="mini" plain>导出</el-button>
+        <el-button type="primary" size="mini" plain :disabled="!helpText" @click="dialogVisible_help = true">帮助</el-button>
       </div>
     </div>
 
     <!-- 表格组件 -->
-    <com-table :style="tableStyle" :tableHeight="tableHeight"></com-table>
+    <com-table :style="tableStyle" :tableHeight="tableHeight" style="padding-right: 30px;"></com-table>
 
     <!-- 分页 -->
     <div class="paginationBox" ref="bottomBox">
@@ -76,14 +86,15 @@
           {{{ '1': '投产前节点', '2': '排产节点' }[item.gantt_detail_type]}}
         </el-radio>
       </div>
+      <p>{{changeList[radioChange] ? changeList[radioChange].message : ''}}</p>
       <span slot="footer" class="dialog-footer">
         <el-button size="mini" @click="dialogVisible_change = false">取 消</el-button>
-        <el-button size="mini" type="primary" :disabled="!radioChange" @click="dialogChange">继 续</el-button>
+        <el-button size="mini" type="primary" :disabled="changeList[radioChange] && changeList[radioChange].message ? true : false" @click="dialogChange">继 续</el-button>
       </span>
     </el-dialog>
 
     <!-- 弹出层：帮助 -->
-    <el-dialog title="帮助" :visible.sync="dialogVisible_help" width="40%">
+    <el-dialog class="helpComDialog" title="帮助" :visible.sync="dialogVisible_help" width="95%">
       <p v-html="helpText"></p>
     </el-dialog>
 
@@ -98,7 +109,6 @@ export default {
   components: { ComTable, ComAdvancedQuery },
   data() {
     return {
-      asd: true,
       tableHeight: 0,
       tableStyle: {},
       /* 弹出层 */
@@ -109,7 +119,7 @@ export default {
       editList: [], //                编辑：投产前、排产
       radioEdit: '', //               编辑：值
       changeList: [], //              批量变更节点：选项
-      radioChange: '', //             批量变更节点：绑定值
+      radioChange: 0, //              批量变更节点：绑定值
       messageChange: '', //           批量变更节点：提示文字
       itemGanttSummary: [], //        甘特表类型数组
       audit_status: 1, //             1提交审核，2撤销审核
@@ -172,12 +182,25 @@ export default {
       win({ title: '编辑', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) } })
     },
     /**
+     * [下拉菜单]
+     * @param {[String]} name 触发的事件名称
+     */
+    dropdown(name) {
+      this[name]()
+    },
+    /**
      * [节点变更]
      */
     nodeChange() {
       const { item_gantt_id = '', item_id = '' } = this
       /** 请求：节点变更前验证 **/
       this.$store.dispatch('Dh/A_beforBatchAdjusmentItemGantt', { item_gantt_id, item_id, that: this })
+    },
+    /**
+     * [历史变更记录]
+     */
+    history() {
+      console.log('历史变更记录')
     },
     /**
      * [审核操作前的验证]
@@ -333,8 +356,9 @@ export default {
 
 /*** 顶部按钮 ***/
 .topBtnLine {
-  width: 100%;
+  width: calc(100% - 30px);
   height: 40px;
+  margin-right: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -360,5 +384,33 @@ export default {
 }
 .dialogLine > span {
   white-space: nowrap;
+}
+</style>
+
+<style>
+.helpComDialog > .el-dialog {
+  border-radius: 15px !important;
+  overflow: hidden;
+}
+.helpComDialog > .el-dialog > .el-dialog__header {
+  padding: 10px 20px !important;
+  background: #77a3d3 !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__header > .el-dialog__title {
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__header > .el-dialog__headerbtn {
+  top: 15px !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__header > .el-dialog__headerbtn > .el-dialog__close {
+  color: #000000 !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__body {
+  padding: 20px !important;
+}
+.helpComDialog > .el-dialog > .el-dialog__body > p {
+  max-height: 500px !important;
+  overflow-y: auto !important;
 }
 </style>

@@ -2,7 +2,7 @@
 <!-- 表格：大货_折叠部分 -->
 
 <template>
-  <div class="tableContent" :style="btnLineStyle">
+  <div :style="[tableContent, btnLineStyle]">
 
     <!-- 按钮组 -->
     <div class="btnLine" :style="btnLineStyle">
@@ -13,7 +13,7 @@
         >
           完成节点
         </el-button>
-        <el-button type="primary" size="mini" @click="followUp">节点跟进</el-button>
+        <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id" @click="followUp">节点跟进</el-button>
         <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id" @click="change">变更节点</el-button>
         <el-button type="primary" size="mini" :disabled="!(choiceRow.item_node_id && choiceRow.is_complete !== 0)" @click="cancel">取消完成</el-button>
         <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id || !choiceRow.node_complete_id" @click="tuneUp">调整完成比例</el-button>
@@ -33,7 +33,7 @@
     </div>
 
     <!-- 表格 -->
-    <el-table :data="tableData_2" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..."
+    <el-table :data="tableData_2" max-height="500" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..."
       :cell-style="cellStyle" @row-click="rowClick"
     >
       <el-table-column width="45">
@@ -54,7 +54,7 @@
       <!-- 完成方式 -->
       <el-table-column label="完成方式" width="100">
         <template slot-scope="scope">
-          {{{ 1: '手动', 2: '自动' }[scope.row.completion_method] || ''}}
+          {{{ '1': '手动', '2': '自动', '1+2': '手动加自动' }[scope.row.completion_method] || ''}}
         </template>
       </el-table-column>
       <!-- 延期/剩余天数 -->
@@ -87,7 +87,7 @@
         <template slot-scope="scope">
           <div class="comCellBox">
             <div class="comCell">
-              <p v-for="(item, index) in scope.row.contents" :key="'contents_' + index">{{item}}</p>
+              <span v-for="(item, index) in scope.row.contents" :key="'contents_' + index">{{item}}</span>
             </div>
           </div>
         </template>
@@ -113,12 +113,13 @@ export default {
   props: ['row'], // 此条数据
   data() {
     return {
+      scrollLeft: 0, // 父级表格向左滑动距离
       auditText: {
         '1': '草稿中',
         '2': '完成待审核',
         '3': '审核通过',
         '4': '审核驳回',
-        '5': '无审核，直接完成',
+        '5': '无审核',
         '6': '撤销审核'
       },
       btnLineStyle: {}, // 按钮组样式
@@ -128,8 +129,25 @@ export default {
     }
   },
   created() {
-    const btnLineStyle = { width: (window.document.documentElement.clientWidth - 60) + 'px' }
+    const btnLineStyle = { width: (window.document.documentElement.clientWidth - 90) + 'px' }
     this.btnLineStyle = btnLineStyle
+  },
+  mounted() {
+    const that = this
+    let i = 0
+    const timer = setInterval(function () {
+      const obj = document.querySelector('.el-table__body-wrapper')
+      if (obj) {
+        obj.addEventListener('scroll', (event) => {
+          that.scrollLeft = event.target.scrollLeft
+        })
+        clearInterval(timer)
+      }
+      if (i > 500) {
+        clearInterval(timer)
+      }
+      i++
+    }, 100)
   },
   computed: {
     ...mapState('Dh', ['loading', 'pageObj']),
@@ -155,7 +173,14 @@ export default {
         const { index } = this.row
         return state.pageObj[index]
       }
-    })
+    }),
+    /**
+     * [组件样式：内部随外部滑动]
+     */
+    tableContent() {
+      const { scrollLeft = 0 } = this
+      return { marginLeft: `${scrollLeft + 30}px` }
+    }
   },
   methods: {
     /**
@@ -168,7 +193,7 @@ export default {
       /* 发起请求 */
       const { choiceRow: { item_id, item_node_id, completion_method } } = this
       /** 请求：节点完成前验证 **/
-      this.$store.dispatch('Dh/A_testItemNodeStatus', { item_id, item_node_id, completion_method, index })
+      this.$store.dispatch('Dh/A_testItemNodeStatus', { item_id, item_node_id, completion_method, index, that: this })
     },
     /**
      * [节点跟进]
@@ -299,9 +324,6 @@ export default {
 
 <style scoped>
 /*** 折叠内容 ***/
-.tableContent {
-  margin-left: 30px;
-}
 .btnLine { /* 顶部按钮行 */
   width: 100%;
   min-height: 40px;

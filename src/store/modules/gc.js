@@ -231,7 +231,7 @@ const Gc = {
     /**
      * [请求：节点完成前验证]
      */
-    A_testItemNodeStatus({ state }, { item_id, item_node_id, completion_method, index }) {
+    A_testItemNodeStatus({ state }, { item_id, item_node_id, completion_method, index, that }) {
       const name = '节点完成前验证'
       const obj = { item_node_id }
       const suc = function (res) {
@@ -250,7 +250,7 @@ const Gc = {
             url = url + path + `?action=${action}&id=${node_complete_id}`
           }
           // eslint-disable-next-line
-          updateWin({ title: '完成节点', width: 1700, height: 700, url, param, onClose() {}, fn() {} })
+          updateWin({ title: '完成节点', width: 1700, height: 700, url, param, onClose() {}, fn() { that.f5(false) } })
         }
         /* 关闭：加载动画 */
         state.loading[index] = false

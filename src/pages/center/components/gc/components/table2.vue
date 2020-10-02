@@ -2,7 +2,7 @@
 <!-- 表格：工厂_折叠部分 -->
 
 <template>
-  <div class="tableContent" :style="btnLineStyle">
+  <div :style="[tableContent, btnLineStyle]">
 
     <!-- 按钮组 -->
     <div class="btnLine" :style="btnLineStyle">
@@ -33,7 +33,7 @@
     </div>
 
     <!-- 表格 -->
-    <el-table :data="tableData_2" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..."
+    <el-table :data="tableData_2" max-height="500" border :highlight-current-row="true" v-loading="loading2" element-loading-text="数据加载中..."
       :cell-style="cellStyle" @row-click="rowClick"
     >
       <el-table-column width="45">
@@ -113,12 +113,13 @@ export default {
   props: ['row'], // 此条数据
   data() {
     return {
+      scrollLeft: 0, // 父级表格向左滑动距离
       auditText: {
         '1': '草稿中',
         '2': '完成待审核',
         '3': '审核通过',
         '4': '审核驳回',
-        '5': '无审核，直接完成',
+        '5': '无审核',
         '6': '撤销审核'
       },
       btnLineStyle: {}, // 按钮组样式
@@ -128,8 +129,25 @@ export default {
     }
   },
   created() {
-    const btnLineStyle = { width: (window.document.documentElement.clientWidth - 60) + 'px' }
+    const btnLineStyle = { width: (window.document.documentElement.clientWidth - 90) + 'px' }
     this.btnLineStyle = btnLineStyle
+  },
+  mounted() {
+    const that = this
+    let i = 0
+    const timer = setInterval(function () {
+      const obj = document.querySelector('.el-table__body-wrapper')
+      if (obj) {
+        obj.addEventListener('scroll', (event) => {
+          that.scrollLeft = event.target.scrollLeft
+        })
+        clearInterval(timer)
+      }
+      if (i > 500) {
+        clearInterval(timer)
+      }
+      i++
+    }, 100)
   },
   computed: {
     ...mapState('Gc', ['loading', 'pageObj']),
@@ -155,7 +173,14 @@ export default {
         const { index } = this.row
         return state.pageObj[index]
       }
-    })
+    }),
+    /**
+     * [组件样式：内部随外部滑动]
+     */
+    tableContent() {
+      const { scrollLeft = 0 } = this
+      return { marginLeft: `${scrollLeft + 30}px` }
+    }
   },
   methods: {
     /**
@@ -171,7 +196,7 @@ export default {
       /* 发起请求 */
       const { choiceRow: { item_id, item_node_id, completion_method } } = this
       /** 请求：节点完成前验证 **/
-      this.$store.dispatch('Gc/A_testItemNodeStatus', { item_id, item_node_id, completion_method, index })
+      this.$store.dispatch('Gc/A_testItemNodeStatus', { item_id, item_node_id, completion_method, index, that: this })
     },
     /**
      * [节点跟进]
@@ -300,9 +325,6 @@ export default {
 
 <style scoped>
 /*** 折叠内容 ***/
-.tableContent {
-  margin-left: 30px;
-}
 .btnLine { /* 顶部按钮行 */
   width: 100%;
   min-height: 40px;

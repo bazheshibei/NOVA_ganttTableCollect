@@ -3,6 +3,7 @@
  * [大货模块]
  */
 import Api from '@/config/api'
+// import LocalData from '../data.js'
 import Tool from '../tool.js'
 import { MessageBox } from 'element-ui'
 
@@ -50,6 +51,7 @@ const Dh = {
      * [请求：表格基础数据]
      */
     A_tableData({ state }) {
+      // const res = JSON.parse(LocalData['大货汇总'])
       const res = JSON.parse(localStorage.getItem('大货汇总'))
       const { data, nums, title, yjts } = res
       /* 给数据添加属性 */
@@ -64,14 +66,14 @@ const Dh = {
       // const { pagenum, rownum, loadingPage, filter_data } = state
       // if (!loadingPage) {
       //   state.loadingPage = true
-      //   // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
+      //   // const empid = 'a42e4c2d10ad46d7a3de0d8fbe76d56f'
       //   const empid = ''
       //   /* 发起请求 */
       //   const name = '统计列表'
       //   const obj = { filter_data: JSON.stringify(filter_data), type: 1, page: parseInt(pagenum) - 1, num: rownum, empid }
       //   const suc = function (res) {
       //     // console.log(res)
-      //     localStorage.setItem('大货汇总', JSON.stringify(res))
+      //     // localStorage.setItem('大货汇总', JSON.stringify(res))
       //     const { data, nums, title, yjts } = res
       //     /* 给数据添加属性 */
       //     const list = Tool.mapData(data, yjts, 'nodes')
@@ -89,7 +91,8 @@ const Dh = {
      * @param {[Object]} row 当前展开行的数据
      */
     A_tableOtherData({ state }, { row }) {
-      // const res = JSON.parse(localStorage.getItem('大货折叠数据') || '{}')
+      // // const res = JSON.parse(LocalData['大货折叠数据'])
+      // const res = JSON.parse(localStorage.getItem('大货折叠数据'))
       // const { index } = row
       // const { data, nums } = res
       // const { tableData_2, loading } = state
@@ -106,7 +109,7 @@ const Dh = {
       const { item_gantt_id, index } = row
       const { pagenum, rownum } = state.pageObj[index]
       const { node_name, status } = state
-      // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
+      // const empid = 'a42e4c2d10ad46d7a3de0d8fbe76d56f'
       const empid = ''
       /* 发起请求 */
       const name = '节点列表'
@@ -323,7 +326,7 @@ const Dh = {
     /**
      * [请求：节点完成前验证]
      */
-    A_testItemNodeStatus({ state }, { item_id, item_node_id, completion_method, index }) {
+    A_testItemNodeStatus({ state }, { item_id, item_node_id, completion_method, index, that }) {
       const name = '节点完成前验证'
       const obj = { item_node_id }
       // const obj = { item_node_id: '8a8a806273ec6b4a0173ec76f295000d' }
@@ -343,7 +346,7 @@ const Dh = {
             url = url + path + `?action=${action}&id=${node_complete_id}`
           }
           // eslint-disable-next-line
-          updateWin({ title: '完成节点', width: 1700, height: 700, url, param, onClose() {}, fn() {} })
+          updateWin({ title: '完成节点', width: 1700, height: 700, url, param, onClose() {}, fn() { that.f5(false) } })
         }
         /* 关闭：加载动画 */
         const { loading } = state
