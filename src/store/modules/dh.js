@@ -51,40 +51,40 @@ const Dh = {
      * [请求：表格基础数据]
      */
     A_tableData({ state }) {
-      // const res = JSON.parse(LocalData['大货汇总'])
-      const res = JSON.parse(localStorage.getItem('大货汇总'))
-      const { data, nums, title, yjts } = res
-      /* 给数据添加属性 */
-      const list = Tool.mapData(data, yjts, 'nodes')
-      // console.log('list ----- ', res)
-      /* 赋值 */
-      state.tableData_1 = list //  表格数据
-      state.pageCount = nums //    总条数
-      state.tableNodes = title //  列：表格外层
-      state.loadingPage = false // 隐藏加载动画
+      // // const res = JSON.parse(LocalData['大货汇总'])
+      // const res = JSON.parse(localStorage.getItem('大货汇总'))
+      // const { data, nums, title, yjts } = res
+      // /* 给数据添加属性 */
+      // const list = Tool.mapData(data, yjts, 'nodes')
+      // // console.log('list ----- ', res)
+      // /* 赋值 */
+      // state.tableData_1 = list //  表格数据
+      // state.pageCount = nums //    总条数
+      // state.tableNodes = title //  列：表格外层
+      // state.loadingPage = false // 隐藏加载动画
 
-      // const { pagenum, rownum, loadingPage, filter_data } = state
-      // if (!loadingPage) {
-      //   state.loadingPage = true
-      //   // const empid = 'a42e4c2d10ad46d7a3de0d8fbe76d56f'
-      //   const empid = ''
-      //   /* 发起请求 */
-      //   const name = '统计列表'
-      //   const obj = { filter_data: JSON.stringify(filter_data), type: 1, page: parseInt(pagenum) - 1, num: rownum, empid }
-      //   const suc = function (res) {
-      //     // console.log(res)
-      //     // localStorage.setItem('大货汇总', JSON.stringify(res))
-      //     const { data, nums, title, yjts } = res
-      //     /* 给数据添加属性 */
-      //     const list = Tool.mapData(data, yjts, 'nodes')
-      //     /* 赋值 */
-      //     state.tableData_1 = list //  表格数据
-      //     state.pageCount = nums //    总条数
-      //     state.tableNodes = title //  列：表格外层
-      //     state.loadingPage = false // 隐藏加载动画
-      //   }
-      //   Api({ name, obj, suc })
-      // }
+      const { pagenum, rownum, loadingPage, filter_data } = state
+      if (!loadingPage) {
+        state.loadingPage = true
+        // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
+        const empid = ''
+        /* 发起请求 */
+        const name = '统计列表'
+        const obj = { filter_data: JSON.stringify(filter_data), type: 1, page: parseInt(pagenum) - 1, num: rownum, empid }
+        const suc = function (res) {
+          // console.log(res)
+          // localStorage.setItem('大货汇总', JSON.stringify(res))
+          const { data, nums, title, yjts } = res
+          /* 给数据添加属性 */
+          const list = Tool.mapData(data, yjts, 'nodes')
+          /* 赋值 */
+          state.tableData_1 = list //  表格数据
+          state.pageCount = nums //    总条数
+          state.tableNodes = title //  列：表格外层
+          state.loadingPage = false // 隐藏加载动画
+        }
+        Api({ name, obj, suc })
+      }
     },
     /**
      * [请求：表格折叠数据]
@@ -109,7 +109,7 @@ const Dh = {
       const { item_gantt_id, index } = row
       const { pagenum, rownum } = state.pageObj[index]
       const { node_name, status } = state
-      // const empid = 'a42e4c2d10ad46d7a3de0d8fbe76d56f'
+      // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
       const empid = ''
       /* 发起请求 */
       const name = '节点列表'
@@ -127,12 +127,18 @@ const Dh = {
         state.tableData_2 = Object.assign({}, tableData_2)
         state.loading = Object.assign({}, loading)
         state.pageObj[index].pageCount = nums
+        /* 重置搜索条件 */
+        state.node_name = ''
+        state.status = ''
       }
       const err = function () {
         /* 关闭：加载动画 */
         const { loading } = state
         loading[index] = false
         state.loading = Object.assign({}, loading)
+        /* 重置搜索条件 */
+        state.node_name = ''
+        state.status = ''
       }
       Api({ name, obj, suc, err })
     },
@@ -263,7 +269,6 @@ const Dh = {
         // console.log('大货甘特表汇总发起变更前验证 ----- ', res)
         const { data = [], msg, status } = res
         const list = []
-        let message = ''
         let goTo = false
         if (String(status) === '0') {
           MessageBox({ title: '数据异常', message: msg, type: 'warning', closeOnClickModal: false, closeOnPressEscape: false })
@@ -290,9 +295,6 @@ const Dh = {
           return false
         } else {
           data.forEach(function (item) {
-            if (item.message) {
-              message = item.message // ④ 记录：message
-            }
             if (item.message && !item.item_gantt_detail_id) {
               goTo = true // 通往 ③
             } else {
@@ -317,7 +319,6 @@ const Dh = {
             /* ----- 情况 ④：多选一  提示message ----- */
             that.changeList = list
             that.dialogVisible_change = true
-            that.messageChange = message
           }
         }
       }

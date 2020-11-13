@@ -93,10 +93,18 @@ const Gc = {
         state.tableData_2 = Object.assign({}, tableData_2)
         state.loading = Object.assign({}, loading)
         state.pageObj[index].pageCount = nums
+        /* 重置搜索条件 */
+        state.node_name = ''
+        state.status = ''
       }
       const err = function () {
         /* 关闭：加载动画 */
-        state.loading[index] = false
+        const { loading } = state
+        loading[index] = false
+        state.loading = Object.assign({}, loading)
+        /* 重置搜索条件 */
+        state.node_name = ''
+        state.status = ''
       }
       Api({ name, obj, suc, err })
     },
@@ -169,7 +177,6 @@ const Gc = {
         // console.log('大货甘特表汇总发起变更前验证 ----- ', res)
         const { data = [], msg, status } = res
         const list = []
-        let message = ''
         let goTo = false
         if (String(status) === '0') {
           MessageBox({ title: '数据异常', message: msg, type: 'warning', closeOnClickModal: false, closeOnPressEscape: false })
@@ -195,9 +202,6 @@ const Gc = {
           return
         } else {
           data.forEach(function (item) {
-            if (item.message) {
-              message = item.message // ④ 记录：message
-            }
             if (item.message && !item.item_gantt_detail_id) {
               goTo = true // 通往 ③
             } else {
@@ -223,7 +227,6 @@ const Gc = {
           /* ----- 情况 ④：多选一  提示message ----- */
           that.changeList = list
           that.dialogVisible_change = true
-          that.messageChange = message
         }
       }
       Api({ name, obj, suc })

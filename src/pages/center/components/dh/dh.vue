@@ -18,7 +18,11 @@
             变更相关<i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="nodeChange" :disabled="!item_gantt_id || disabledChange[item_gantt_id] || !isChangeNodes">批量变更节点</el-dropdown-item>
+            <el-dropdown-item command="nodeChange"
+              :disabled="!item_gantt_id || disabledChange[item_gantt_id] || !isChangeNodes || String(tableRow_1.audit_result) === '2'"
+            >
+              批量变更节点
+            </el-dropdown-item>
             <el-dropdown-item command="history">历史变更记录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -79,9 +83,6 @@
     <!-- 弹出层：批量变更节点 -->
     <el-dialog :visible.sync="dialogVisible_change" width="40%" :close-on-click-modal="false" :close-on-press-escape="false">
       <div class="dialogLine">
-        <p>{{messageChange}}</p>
-      </div>
-      <div class="dialogLine">
         <el-radio v-for="(item, index) in changeList" :key="'change_' + index" v-model="radioChange" :label="index" >
           {{{ '1': '投产前节点', '2': '排产节点' }[item.gantt_detail_type]}}
         </el-radio>
@@ -120,7 +121,6 @@ export default {
       radioEdit: '', //               编辑：值
       changeList: [], //              批量变更节点：选项
       radioChange: 0, //              批量变更节点：绑定值
-      messageChange: '', //           批量变更节点：提示文字
       itemGanttSummary: [], //        甘特表类型数组
       audit_status: 1, //             1提交审核，2撤销审核
       radio: '', //                   多选时提交的节点
@@ -374,6 +374,9 @@ export default {
 }
 
 /*** 弹出层 ***/
+.el-dialog > .el-dialog__body > .dialogLine:first-child {
+  margin-top: 20px;
+}
 .dialogLine {
   margin-bottom: 20px;
   display: flex;

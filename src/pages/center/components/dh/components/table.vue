@@ -30,6 +30,11 @@
           {{scope.row.tcq || '未提报'}}
         </template>
       </el-table-column>
+      <el-table-column label="变更状态" width="100">
+        <template slot-scope="scope">
+          {{scope.row.audit_result_content || '无变更'}}
+        </template>
+      </el-table-column>
       <el-table-column label="排产审核状态" width="100">
         <template slot-scope="scope">
           {{scope.row.pc || '未提报'}}

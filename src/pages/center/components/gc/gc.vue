@@ -66,9 +66,6 @@
     <!-- 弹出层：批量变更节点 -->
     <el-dialog :visible.sync="dialogVisible_change" width="40%" :close-on-click-modal="false" :close-on-press-escape="false">
       <div class="dialogLine">
-        <p>{{messageChange}}</p>
-      </div>
-      <div class="dialogLine">
         <el-radio v-for="(item, index) in changeList" :key="'change_' + index" v-model="radioChange" :label="index" >
           {{{ '1': '投产前节点', '2': '排产节点' }[item.gantt_detail_type]}}
         </el-radio>
@@ -104,7 +101,6 @@ export default {
       dialogVisible_help: false, //   是否显示弹出层：帮助
       changeList: [], //              批量变更节点：选项
       radioChange: '', //             批量变更节点：绑定值
-      messageChange: '', //           批量变更节点：提示文字
       itemGanttSummary: [], //        甘特表类型数组
       audit_status: 1, //             1提交审核，2撤销审核
       radio: '', //                   多选时提交的节点

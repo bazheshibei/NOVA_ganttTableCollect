@@ -78,9 +78,12 @@ export default {
       const { item_id, item_gantt_id, item_gantt_detail_id } = this
       localStorage.setItem('NOVA_reject', JSON.stringify({ item_id, item_gantt_id, item_gantt_detail_id }))
       /* win 方法打开页面 */
-      const url = window.location.origin + '/nova/pages/itemganttsummary/itemGanttSummaryUpdate.html'
+      // const url = window.location.origin + '/nova/pages/itemganttsummary/itemGanttSummaryUpdate.html'
+      const url = window.location.origin + '/nova/itemGanttSummaryShowAction.do?action=getItemSummaryMl&item_id=' + item_id
       // eslint-disable-next-line
-      win({ title: '编辑', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) } })
+      // win({ title: '编辑', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) } })
+      // eslint-disable-next-line
+      updateWin({ title: '编辑', width: 1500, height: 600, url, param: { item_id }, onClose() {}, fn() { that.f5(false) } })
     },
     /**
      * [高级查询]

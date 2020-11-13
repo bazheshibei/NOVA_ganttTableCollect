@@ -7,16 +7,35 @@
     <!-- 按钮组 -->
     <div class="btnLine" :style="btnLineStyle">
       <div>
-        <el-button type="primary" size="mini" @click="f5">刷新</el-button>
+        <el-button type="primary" size="mini" @click="clickSearch">刷新</el-button>
+        <!-- 完成节点 [手动完成 && 选中 && 完成] -->
         <el-button type="primary" size="mini"
           :disabled="String(choiceRow.completion_method) === '1' && choiceRow.item_node_id && choiceRow.is_complete === 0 ? false : true" @click="complete"
         >
           完成节点
         </el-button>
-        <el-button type="primary" size="mini" @click="followUp">节点跟进</el-button>
-        <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id" @click="change">变更节点</el-button>
-        <el-button type="primary" size="mini" :disabled="!(choiceRow.item_node_id && choiceRow.is_complete !== 0)" @click="cancel">取消完成</el-button>
-        <el-button type="primary" size="mini" :disabled="!choiceRow.item_node_id || !choiceRow.node_complete_id" @click="tuneUp">调整完成比例</el-button>
+        <!-- 节点跟进 [未选中 || 提报状态  === (草稿中、审核汇总)] -->
+        <el-button type="primary" size="mini" @click="followUp">
+          节点跟进
+        </el-button>
+        <!-- 变更节点 [未选中] -->
+        <el-button type="primary" size="mini"
+          :disabled="!choiceRow.item_node_id" @click="change"
+        >
+          变更节点
+        </el-button>
+        <!-- 取消完成 [未选中 || 未完成 || 完成方式 === 自动] -->
+        <el-button type="primary" size="mini"
+          :disabled="!choiceRow.item_node_id || choiceRow.is_complete === 0 || String(choiceRow.completion_method) === '2'" @click="cancel"
+        >
+          取消完成
+        </el-button>
+        <!-- 调整完成比例 [未选中 || 没有'节点完成ID'] -->
+        <el-button type="primary" size="mini"
+          :disabled="!choiceRow.item_node_id || !choiceRow.node_complete_id" @click="tuneUp"
+        >
+          调整完成比例
+        </el-button>
       </div>
       <div class="searchBox">
         <el-input v-model="node_name" size="mini" placeholder="请输入节点名称" @change="clickSearch"></el-input>
@@ -42,7 +61,16 @@
         </template>
       </el-table-column>
       <!-- 节点名称 -->
-      <el-table-column label="节点名称" prop="node_name" width="150"></el-table-column>
+      <el-table-column label="节点名称" width="150">
+        <template slot-scope="scope">
+          <el-popover v-if="String(scope.row.completion_method) === '2' && scope.row.wancheng && scope.row.complete_remark"
+            placement="top-start" trigger="hover" :content="scope.row.complete_remark"
+          >
+            <span slot="reference">{{scope.row.node_name}}</span>
+          </el-popover>
+          <span v-else>{{scope.row.node_name}}</span>
+        </template>
+      </el-table-column>
       <!-- 计划完成日期 -->
       <el-table-column label="计划完成日期" prop="plan_enddate" width="100"></el-table-column>
       <!-- 节点状态 -->
@@ -52,11 +80,11 @@
         </template>
       </el-table-column>
       <!-- 完成方式 -->
-      <!-- <el-table-column label="完成方式" width="100">
+      <el-table-column label="完成方式" width="100">
         <template slot-scope="scope">
-          {{{ 1: '手动', 2: '自动' }[scope.row.completion_method] || ''}}
+          {{{ '1': '手动', '2': '自动', '1+2': '手动加自动' }[scope.row.completion_method] || ''}}
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <!-- 延期/剩余天数 -->
       <el-table-column label="延期/剩余天数" width="100">
         <template slot-scope="scope">
@@ -73,13 +101,18 @@
       <el-table-column label="实际完成日期" prop="actual_enddate" width="100"></el-table-column>
       <!-- 完成人 -->
       <el-table-column label="完成人" prop="complete_employeename" width="100"></el-table-column>
-      <!-- 审核状态 -->
-      <el-table-column label="审核状态" width="100">
+      <!-- 确认状态 -->
+      <el-table-column label="确认状态" width="100">
         <template slot-scope="scope">
-          <span v-if="String(scope.row.audit_status) === '2'">
-            {{scope.row.next_audit_stage}}
-          </span>
-          <span v-else>{{auditText[scope.row.audit_status] || '无需审核'}}</span>
+          <div v-if="String(scope.row.node_audit_status) === '0'">
+            <span v-if="String(scope.row.complete_confirmation) === '1'">
+              需要{{scope.row.confirmation_post_name}}审核
+            </span>
+            <span v-else>无需审核</span>
+          </div>
+          <div v-else>
+            {{auditText[scope.row.node_audit_status]}}
+          </div>
         </template>
       </el-table-column>
       <!-- 节点变更记录 -->
