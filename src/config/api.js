@@ -6,6 +6,7 @@ import Axios from '@/config/axios'
  * [服务器地址]
  */
 // const host = '/api/' //  晓东
+// const host = '/api2/' // 孜祎
 const host = window.location.origin + '/nova/'
 
 /**

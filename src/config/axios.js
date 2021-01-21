@@ -50,18 +50,18 @@ const HTTP = function (param) {
   // Axios({ method, url, data })
   Axios({ method, url, data: Qs.stringify(data), timeout: 0 })
     .then(function (res) {
-      suc(res.data)
       /* 以服务的方式调用的 Loading 需要异步关闭 */
       if (loading) {
         loadingInstance.close()
       }
+      suc(res.data)
     })
     .catch(function (res) {
-      err(res)
       /* 以服务的方式调用的 Loading 需要异步关闭 */
       if (loading) {
         loadingInstance.close()
       }
+      err(res)
     })
 }
 

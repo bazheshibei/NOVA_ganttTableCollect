@@ -18,7 +18,7 @@ Tool.mapData = function (list, yjts, name = '') {
   /* 循环数据 */
   list.map(function (item, index) {
     const { actual_enddate } = item
-    const completeTime = typeof actual_enddate === 'string' && actual_enddate ? new Date(actual_enddate).getTime() : now
+    const completeTime = typeof actual_enddate === 'string' && actual_enddate ? new Date(actual_enddate.split(' ')[0]).getTime() : now
     item.index = index
     if (name) {
       let arr = []
@@ -46,49 +46,127 @@ Tool.mapData = function (list, yjts, name = '') {
  * @return {[Object]} item         添加属性后的节点
  */
 Tool._map = function (item, completeTime, yjts) {
-  /* ----- 延期/剩余天数 ----- */
-  const num = (completeTime - new Date(item.plan_enddate).getTime()) / (1000 * 60 * 60 * 24) // 超期天数：当前日期 - 计划日期
-  if (num > 0) {
-    item.timeText = `<span style="color: red;">${isNaN(num) ? '/' : num}</span>` // 延期天数
-  } else {
-    item.timeText = `<span>${isNaN(num) ? '/' : Math.abs(num)}</span>` // 剩余天数
-  }
-  /* ----- 节点状态 && 预警状态 ----- */
-  if (item.actual_enddate !== null && item.actual_enddate) {
-    /* 节点状态：完成 */
-    item.wancheng = true
-    if (num < 0) {
-      item.nodeTypeText = `<span style="color: #67C23A;">提前完成</span>`
-    } else if (num === 0) {
-      item.nodeTypeText = `<span style="color: #67C23A;">完成</span>`
-    } else if (num > 0) {
-      item.nodeTypeText = `<span style="color: #E6A23C;">超期完成</span>`
-    }
-    /* 预警状态：完成 -> 正常 */
-    item.warningText = '<span>正常</span>'
-  } else {
-    /* 节点状态：未完成 */
-    item.wancheng = false
+  const { plan_enddate, actual_enddate, node_content_type = 'time' } = item
+  if (node_content_type === 'time' && plan_enddate === '/') { /* ----- 时间节点：/ ----- */
+    item.timeText = '/' //            延期/剩余天数
+    item.wancheng = false //          节点名称 是否显示悬浮框
+    item.nodeTypeText = '节点不存在' // 节点状态
+    item.warningText = '' //          预警状态
+    item.is_show_warning = false //   在 table 的节点中是否显示预警图标 !
+  } else if (node_content_type === 'time' && typeof new Date(plan_enddate).getTime() === 'number') { /* ----- 时间节点：2020-09-09 ----- */
+    /* 延期/剩余天数 */
+    const num = (completeTime - new Date(plan_enddate).getTime()) / (1000 * 60 * 60 * 24) // 超期天数：当前日期 - 计划日期
     if (num > 0) {
-      item.nodeTypeText = `<span style="color: #F56C6C;">超期未完成</span>`
-      /* 预警状态：超期未完成 -> 常预警 */
-      item.warningText = '<span style="color: #F56C6C;">预警</span>'
-      item.is_show_warning = true
-    } else if (num <= 0) {
-      item.nodeTypeText = `<span style="color: #909399;">未完成</span>`
-      /* 预警状态：未完成 -> 倒计时预警 */
-      if (yjts && num >= parseInt(Math.abs(yjts))) {
-        item.warningText = '<span style="color: #F56C6C;">预警</span>' // 倒计时预警：超期天数 >= 预警时间
-        item.is_show_warning = true
-      } else {
-        item.warningText = '<span>正常</span>' // 倒计时预警：超期天数 < 预警时间 || 没有预警时间
-      }
+      item.timeText = `<span style="color: red;">${isNaN(num) ? '/' : num}</span>` // 延期天数
     } else {
-      item.warningText = ''
-      item.is_show_warning = false
+      item.timeText = `<span>${isNaN(num) ? '/' : Math.abs(num)}</span>` // 剩余天数
     }
+    /* 节点状态 && 预警状态 */
+    if (actual_enddate !== null && actual_enddate) { /* 节点状态：完成 [有完成时间] */
+      item.wancheng = true
+      if (num > 0) {
+        item.nodeTypeText = `<span style="color: #E6A23C;">超期完成</span>`
+      } else if (num < 0) {
+        item.nodeTypeText = `<span style="color: #67C23A;">提前完成</span>`
+      } else if (num === 0) {
+        item.nodeTypeText = `<span style="color: #67C23A;">完成</span>`
+      }
+      item.warningText = '<span>正常</span>'
+    } else { /* 节点状态：未完成 */
+      item.wancheng = false
+      if (num > 0) { //         超期未完成 -> 常预警
+        item.nodeTypeText = `<span style="color: #F56C6C;">超期未完成</span>`
+        item.warningText = '<span style="color: #F56C6C;">预警</span>'
+        item.is_show_warning = true
+      } else if (num <= 0) { // 未完成 -> 倒计时预警
+        item.nodeTypeText = `<span style="color: #909399;">未完成</span>`
+        if (yjts && num >= parseInt(Math.abs(yjts))) { // 倒计时预警：超期天数 >= 预警时间
+          item.warningText = '<span style="color: #F56C6C;">预警</span>'
+          item.is_show_warning = true
+        } else { //                                       倒计时预警：超期天数 < 预警时间 || 没有预警时间
+          item.warningText = '<span>正常</span>'
+        }
+      } else {
+        item.warningText = ''
+        item.is_show_warning = false
+      }
+    }
+  } else if (node_content_type === 'content') { /* ----- 文本节点 ----- */
+    item.timeText = '/' //          延期/剩余天数
+    item.wancheng = false //        节点名称 是否显示悬浮框
+    item.nodeTypeText = '完成' //    节点状态
+    item.warningText = '' //        预警状态
+    item.is_show_warning = false // 在 table 的节点中是否显示预警图标 !
   }
   return item
+}
+
+//
+//
+//
+//
+
+/**
+ * [禁用条件：完成节点]
+ */
+Tool._disabledComplete = function (choiceRow = {}) {
+  const { item_node_id, completion_method, is_complete, adjustment_audit_result, audit_status } = choiceRow
+  const prov_1 = !item_node_id //                           没选中
+  const prov_2 = String(completion_method) === '2' //       自动完成
+  const prov_3 = String(is_complete) !== '0' //             完成
+  const prov_4 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中 +++
+  const prov_5 = String(audit_status) === '1' //            提报状态：草稿中 +++
+  const prov_6 = String(audit_status) === '2' //            提报状态：审核汇总 +++
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6
+}
+
+/**
+ * [禁用条件：节点跟进]
+ */
+Tool._disabledFollowUp = function (choiceRow = {}, cate = '') {
+  const { item_node_id } = choiceRow
+  const prov_1 = !item_node_id // 没选中
+  return prov_1
+}
+
+/**
+ * [禁用条件：变更节点]
+ */
+Tool._disabledChange = function (choiceRow = {}) {
+  const { item_node_id, adjustment_audit_result, audit_status } = choiceRow
+  const prov_1 = !item_node_id //                           没选中
+  const prov_2 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中
+  const prov_3 = String(audit_status) === '1' //            提报状态：草稿中
+  const prov_4 = String(audit_status) === '2' //            提报状态：审核汇总
+  return prov_1 || prov_2 || prov_3 || prov_4
+}
+
+/**
+ * [禁用条件：取消完成]
+ */
+Tool._disabledCancel = function (choiceRow = {}) {
+  const { item_node_id, completion_method, is_complete, adjustment_audit_result, audit_status } = choiceRow
+  const prov_1 = !item_node_id //                           没选中
+  const prov_2 = String(completion_method) === '2' //       自动完成
+  const prov_3 = String(is_complete) === '0' //             未完成
+  const prov_4 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中 +++
+  const prov_5 = String(audit_status) === '1' //            提报状态：草稿中 +++
+  const prov_6 = String(audit_status) === '2' //            提报状态：审核汇总 +++
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6
+}
+
+/**
+ * [禁用条件：调整完成比例]
+ */
+Tool._disabledTuneUp = function (choiceRow = {}) {
+  const { item_node_id, node_complete_id, is_complete, adjustment_audit_result, audit_status } = choiceRow
+  const prov_1 = !item_node_id //                           没选中
+  const prov_2 = !node_complete_id //                       没有'节点完成ID'
+  const prov_3 = String(is_complete) === '0' //             未完成
+  const prov_4 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中 +++
+  const prov_5 = String(audit_status) === '1' //            提报状态：草稿中 +++
+  const prov_6 = String(audit_status) === '2' //            提报状态：审核汇总 +++
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6
 }
 
 export default Tool

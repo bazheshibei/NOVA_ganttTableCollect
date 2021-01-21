@@ -14,11 +14,18 @@ module.exports = {
     proxyTable: {
       '/api': {
         target: 'http://10.10.0.226:8080/nova', // 晓东
-        // target: 'http://192.168.9.129:8083/nova', // 孜祎
         secure: false, // proxy https
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''
+        }
+      },
+      '/api2': {
+        target: 'http://192.168.9.129:8083/nova', // 孜祎
+        secure: false, // proxy https
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api2': ''
         }
       }
     },

@@ -3,14 +3,18 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 /* 模块 */
-import Dh from './modules/dh.js' // 大货
-import Ml from './modules/ml.js' // 面料
-import Gc from './modules/gc.js' // 大货
+import DhDh from './modules/dh_dh.js' // 大货：大货
+import DhMl from './modules/dh_ml.js' // 大货：面料
+import DhGc from './modules/dh_gc.js' // 大货：工厂
+import MlMl from './modules/ml_ml.js' // 面料：面料
+import MlFs from './modules/ml_fs.js' // 面料：分色
+import MlXz from './modules/ml_xz.js' // 面料：选择
+import KfKf from './modules/kf_kf.js' // 开发：开发
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   modules: {
-    Dh, Ml, Gc
+    DhDh, DhMl, DhGc, MlMl, MlFs, MlXz, KfKf
   },
 
   state: {
