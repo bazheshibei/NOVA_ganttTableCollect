@@ -21,7 +21,8 @@ const url = {
   '大货甘特表汇总发起变更前验证': 'itemNodeAdjustmentShowAction.ndo?action=beforBatchAdjusmentItemGantt',
   '节点完成前验证': 'itemNodecompleteDetailShowAction.ndo?action=testItemNodeStatus',
   '单独变更节点前验证': 'itemGanttSummaryShowAction.ndo?action=adjustmentNodeTest',
-  '甘特表帮助按钮': 'noticeAction.ndo?action=getHelpText'
+  '甘特表帮助按钮': 'noticeAction.ndo?action=getHelpText',
+  '作废': 'itemGanttSummarySaveAction.do?action=voidItemGantt'
 }
 
 const request = function (param) {

@@ -124,7 +124,7 @@
         <template slot-scope="scope">
           <div class="comCellBox">
             <div class="comCell">
-              <span v-for="(item, index) in scope.row.contents" :key="'contents_' + index">{{item}}</span>
+              <p v-for="(item, index) in scope.row.contents" :key="'contents_' + index">{{item}}</p>
             </div>
           </div>
         </template>

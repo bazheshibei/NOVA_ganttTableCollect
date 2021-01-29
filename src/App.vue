@@ -24,4 +24,14 @@ export default {
   left: 0;
   right: 0;
 }
+
+/*** 表头输入内容 ***/
+.thActive {
+  color: #000000;
+}
+.thText {
+  text-align: center;
+  line-height: 14px;
+  padding-top: 4px;
+}
 </style>

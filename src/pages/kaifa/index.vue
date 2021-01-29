@@ -94,6 +94,7 @@ export default {
 }
 .comCell {
   text-align: left !important;
+  flex: 1 !important;
 }
 .comCell > p {
   white-space: nowrap !important;

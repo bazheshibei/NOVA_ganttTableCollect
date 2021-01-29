@@ -8,7 +8,7 @@
       <div>
         <el-button type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
         <el-button type="primary" size="mini" @click="f5">刷新</el-button>
-        <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="view">查看</el-button>
+        <!-- <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="view">查看</el-button> -->
         <el-button type="primary" size="mini" :disabled="!item_gantt_id || !isEdit" @click="edit">编辑</el-button>
         <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(1)">提交审核</el-button>
         <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="beforeSubmit(2)">撤销审核</el-button>
@@ -127,7 +127,7 @@ export default {
      * [查看]
      */
     view() {
-      alert('没做事件')
+      // alert('没做事件')
     },
     /**
      * [编辑]

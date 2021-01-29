@@ -43,6 +43,7 @@ body {
   font-size: 12px !important;
   font-weight: bold !important;
   font-family: Tahoma, Lucida Grande,Lucida Sans,Arial,sans-serif !important;
+  line-height: 14px !important;
   text-align: center !important;
   padding: 0 2px !important;
   background: #dfeffc url(../images/ui-bg_glass_85_dfeffc_1x400.png) 50% 50% repeat-x !important;
@@ -157,7 +158,7 @@ td > .cell {
   align-items: center !important;
 }
 .el-popover > div > .el-input__suffix { /* input 中删除按钮 */
-  margin-top: -6px !important;
+  /* margin-top: -6px !important; */
 }
 .el-popper > .popper__arrow {
   display: none !important;

@@ -8,8 +8,9 @@
       <div>
         <el-button type="primary" size="mini" @click="advancedQuery">高级查询</el-button>
         <el-button type="primary" size="mini" @click="f5">刷新</el-button>
-        <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="view">查看</el-button>
-        <el-button type="primary" size="mini" :disabled="!item_id" @click="edit">编辑</el-button>
+        <!-- <el-button type="primary" size="mini" :disabled="!item_gantt_id" @click="view">查看</el-button> -->
+        <el-button type="primary" size="mini" :disabled="!item_id || tableRow_1.audit_status === '作废'" @click="edit">编辑</el-button>
+        <el-button slot="reference" type="primary" size="mini" :disabled="!item_id || tableRow_1.audit_status === '作废'" @click="dialogVisible_void = true">作废</el-button>
       </div>
       <div>
         <!-- <el-button type="primary" size="mini" plain>导出</el-button> -->
@@ -38,6 +39,15 @@
       <p v-html="helpText"></p>
     </el-dialog>
 
+    <!-- 弹出层：确认作废 -->
+    <el-dialog width="30%" :visible.sync="dialogVisible_void">
+      <p>确定要作废 {{tableRow_1.item_name}} ？</p>
+      <span slot="footer">
+        <el-button size="mini" @click="dialogVisible_void = false">取 消</el-button>
+        <el-button size="mini" type="primary" @click="toVoid">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -52,6 +62,7 @@ export default {
       tableHeight: 0,
       tableStyle: {},
       /* 弹出层 */
+      dialogVisible_void: false, // 是否显示弹出层：作废
       dialogVisible_help: false, // 是否显示弹出层：帮助
       itemGanttSummary: [] //       甘特表类型数组
     }
@@ -70,21 +81,26 @@ export default {
      * [查看]
      */
     view() {
-      alert('没做事件')
+      // alert('没做事件')
     },
     /**
      * [编辑]
      */
     edit() {
       const that = this
-      const { tableRow_1 } = this
-      /* 保存到本地缓存 */
-      const { item_id, item_gantt_id, item_gantt_detail_id = '' } = tableRow_1
-      localStorage.setItem('NOVA_reject', JSON.stringify({ item_id, item_gantt_id, item_gantt_detail_id }))
-      /* win 方法打开页面 */
-      const url = window.location.origin + '/nova/pages/itemganttsummary/itemGanttSummaryUpdate.html'
+      const { item_id } = this
+      const url = window.location.origin + '/nova/pages/itemganttsummary/itemGanttDivdMateeial.jsp'
       // eslint-disable-next-line
-      win({ title: '编辑', width: 1500, height: 600, url, param: {}, fn() { that.f5(false) }, onClose() { that.f5(false) } })
+      updateWin({ title: '编辑', width: 1800, height: 900, url, param: { itemids: item_id }, onClose: function () {}, fn: function () { that.f5(false) } })
+    },
+    /**
+     * [作废]
+     */
+    toVoid() {
+      this.dialogVisible_void = false
+      const { item_gantt_id } = this
+      /** 请求：作废 **/
+      this.$store.dispatch('MlFs/A_voidItemGantt', { item_gantt_id, that: this })
     },
     /**
      * [高级查询]

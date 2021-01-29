@@ -20,13 +20,82 @@
           {{scope.row.index + 1}}
         </template>
       </el-table-column>
-      <el-table-column label="项目名称" prop="item_name" min-width="120"></el-table-column>
-      <el-table-column label="项目类型" prop="material_item_type" min-width="120"></el-table-column>
-      <el-table-column label="跟进人" prop="material_follow_employeename" min-width="120"></el-table-column>
-      <el-table-column label="面料名称" prop="material_describe" min-width="120"></el-table-column>
-      <el-table-column label="审核状态" prop="audit_status" min-width="100"></el-table-column>
-      <el-table-column label="提报人" prop="reporter" min-width="100"></el-table-column>
-      <el-table-column label="创建时间" width="100">
+      <!-- 项目名称 -->
+      <el-table-column prop="item_name" min-width="120">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_1" v-model="tableHeader.item_name" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('item_name')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_1')">
+              项目名称<span>&nbsp;<i class="el-icon-search" :class="tableHeader.item_name ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 项目类型 -->
+      <el-table-column prop="material_item_type" min-width="120">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_2" v-model="tableHeader.material_item_type" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('material_item_type')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_2')">
+              项目类型<span>&nbsp;<i class="el-icon-search" :class="tableHeader.material_item_type ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 跟进人 -->
+      <el-table-column prop="material_follow_employeename" min-width="120">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_3" v-model="tableHeader.material_follow_employeename" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('material_follow_employeename')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_3')">
+              跟进人<span>&nbsp;<i class="el-icon-search" :class="tableHeader.material_follow_employeename ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 面料名称 -->
+      <el-table-column prop="material_describe" min-width="120">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_4" v-model="tableHeader.material_describe" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('material_describe')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_4')">
+              面料名称<span>&nbsp;<i class="el-icon-search" :class="tableHeader.material_describe ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 审核状态 -->
+      <el-table-column prop="audit_status" min-width="100">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_5" v-model="tableHeader.audit_status" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('audit_status')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_5')">
+              审核状态<span>&nbsp;<i class="el-icon-search" :class="tableHeader.audit_status ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 提报人 -->
+      <el-table-column prop="reporter" min-width="100">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_6" v-model="tableHeader.reporter" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('reporter')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_6')">
+              提报人<span>&nbsp;<i class="el-icon-search" :class="tableHeader.reporter ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 创建时间 -->
+      <el-table-column width="100">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_7" v-model="tableHeader.report_time" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('report_time')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_7')">
+              创建时间<span>&nbsp;<i class="el-icon-search" :class="tableHeader.report_time ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
         <template slot-scope="scope">
           <p v-if="scope.row.report_time">
             {{scope.row.report_time === null || scope.row.report_time === '' ? '' : scope.row.report_time.split(' ')[0]}}
@@ -36,9 +105,37 @@
           </p>
         </template>
       </el-table-column>
-      <el-table-column label="面料下达日期" prop="matter_release_time" min-width="100"></el-table-column>
-      <!-- 节点列 -->
-      <el-table-column v-for="(node, nodeKey) in tableNodes" :key="'node_' + nodeKey" :label="node.node_name" :column-key="node.node_code" align="center" width="140">
+      <!-- 面料下达日期 -->
+      <el-table-column prop="matter_release_time" min-width="100">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_8" v-model="tableHeader.matter_release_time" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear('matter_release_time')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_8')">
+              面料下达日期<span>&nbsp;<i class="el-icon-search" :class="tableHeader.matter_release_time ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- ***** 岗位 ***** -->
+      <el-table-column v-for="(businesspost, businesspostKey) in businesspost" :key="'businesspost_' + businesspostKey" align="center" width="140">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input :ref="'business_' + businesspostKey" v-model="businessObj[businesspost.business_post_id]" clearable  size="mini" placeholder="多个查询空格分隔" @clear="clear(businesspost.business_post_id, 'businessObj')" @change="select"></el-input>
+            <div class="thText" slot="reference" style="flex: 1;" @click="tableHeaderClick('business_' + businesspostKey)">
+              {{businesspost.post_name}}<span>&nbsp;<i class="el-icon-search" :class="businessObj[businesspost.business_post_id] ? 'thActive' : ''"></i></span>
+            </div>
+          </el-popover>
+        </template>
+        <template slot-scope="scope">
+          {{scope.row['business_' + businesspost.business_post_id]}}
+        </template>
+      </el-table-column>
+      <!-- ***** 节点列 ***** -->
+      <el-table-column v-for="(node, nodeKey) in tableNodes" :key="'node_' + nodeKey" :column-key="node.node_code" align="center" width="140">
+        <template slot="header" slot-scope="scope">
+          <p>{{node.node_name}}</p>
+          <p>{{node.shouldCompNum}}({{node.conpleteNum}})</p>
+        </template>
         <template slot-scope="scope">
           <div class="comCellBox" v-for="(item, index) in scope.row.nodes" :key="nodeKey + '_' + index" :title="scope.row.item_name">
             <div class="comCell" v-if="item.node_code === node.node_code">
@@ -75,15 +172,73 @@ export default {
   },
   data() {
     return {
-      showIndex: []
+      showIndex: [],
+      tableHeader: {}, // 表头查询对象
+      businessObj: {} //  岗位查询对象
     }
   },
   computed: {
-    ...mapState('MlMl', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading'])
+    ...mapState('MlMl', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading', 'businesspost'])
   },
   methods: {
     /**
-     * [单元格样式]
+     * [表头查询：点击表头，input自动聚焦]
+     * @param {[Int]} index 索引
+     */
+    tableHeaderClick(index) {
+      const that = this
+      setTimeout(function () {
+        if (that.$refs[index] instanceof Array) {
+          that.$refs[index][0].focus()
+        } else {
+          that.$refs[index].focus()
+        }
+      }, 100)
+    },
+    /**
+     * [表头查询：清空输入框]
+     * @param {[String]} name        字段名
+     * @param {[String]} tableHeader 数据名称
+     */
+    clear(name, dataName = 'tableHeader') {
+      this[dataName][name] = ''
+    },
+    /**
+     * [表头查询：搜索]
+     */
+    select() {
+      const { tableHeader, businessObj } = this
+      const obj_1 = this._returnSelectData(tableHeader)
+      const obj_2 = this._returnSelectData(businessObj)
+      /* 重置分页 */
+      this.$store.commit('saveData', { module: 'MlMl', name: 'pagenum', obj: 1 })
+      this.$store.commit('saveData', { module: 'MlMl', name: 'rownum', obj: 10 })
+      this.$store.commit('saveData', { module: 'MlMl', name: 'pageCount', obj: 0 })
+      /* 重置折叠数据 */
+      this.$store.commit('saveData', { module: 'MlMl', name: 'tableData_2', obj: {} })
+      /* 保存表头数据 */
+      this.$store.commit('saveData', { module: 'MlMl', name: 'tableHeader', obj: obj_1 })
+      this.$store.commit('saveData', { module: 'MlMl', name: 'businessObj', obj: obj_2 })
+      /** 查询 **/
+      this.$store.dispatch('MlMl/A_tableData')
+    },
+    /**
+     * [处理搜索条件]
+     * @param  {[Object]} data 搜索对象
+     * @return {[Object]} obj  剔除空项的条件对象
+     */
+    _returnSelectData(data) {
+      const obj = {}
+      for (const x in data) {
+        const item = data[x]
+        if (item) {
+          obj[x] = item.trim()
+        }
+      }
+      return obj
+    },
+    /**
+     * [表格相关：单元格样式]
      */
     cellStyle({ row, column, rowIndex, columnIndex }) {
       if (columnIndex < 2) {
@@ -99,7 +254,7 @@ export default {
       }
     },
     /**
-     * [点击某一行]
+     * [表格相关：点击某一行]
      * @param {[Object]} row    行
      * @param {[Object]} column 列
      * @param {[Object]} event  事件
@@ -122,7 +277,7 @@ export default {
       this.showMore(row)
     },
     /**
-     * [展示折叠内容]
+     * [表格相关：展示折叠内容]
      * @param {[Object]} row 当前展开行的数据
      */
     showMore(row) {

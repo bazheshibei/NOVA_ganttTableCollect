@@ -17,6 +17,14 @@ Tool.mapData = function (list, yjts, name = '') {
   const now = new Date(`${year}-${month}-${day}`).getTime() // 毫秒数
   /* 循环数据 */
   list.map(function (item, index) {
+    /* ----- 处理岗位 ----- */
+    const { itemPostEmpListItem = [] } = item
+    if (itemPostEmpListItem.length) {
+      itemPostEmpListItem.forEach(business => {
+        item['business_' + business.business_post_id] = business.group_emp_name
+      })
+    }
+    /* ----- 处理节点 ----- */
     const { actual_enddate } = item
     const completeTime = typeof actual_enddate === 'string' && actual_enddate ? new Date(actual_enddate.split(' ')[0]).getTime() : now
     item.index = index
@@ -110,63 +118,68 @@ Tool._map = function (item, completeTime, yjts) {
  * [禁用条件：完成节点]
  */
 Tool._disabledComplete = function (choiceRow = {}) {
-  const { item_node_id, completion_method, is_complete, adjustment_audit_result, audit_status } = choiceRow
+  const { item_node_id, completion_method, is_complete, adjustment_audit_result, audit_status, audit_content } = choiceRow
   const prov_1 = !item_node_id //                           没选中
   const prov_2 = String(completion_method) === '2' //       自动完成
   const prov_3 = String(is_complete) !== '0' //             完成
   const prov_4 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中 +++
   const prov_5 = String(audit_status) === '1' //            提报状态：草稿中 +++
   const prov_6 = String(audit_status) === '2' //            提报状态：审核汇总 +++
-  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6
+  const prov_7 = audit_content === '作废' //                 审核状态 === '作废'
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6 || prov_7
 }
 
 /**
  * [禁用条件：节点跟进]
  */
 Tool._disabledFollowUp = function (choiceRow = {}, cate = '') {
-  const { item_node_id } = choiceRow
-  const prov_1 = !item_node_id // 没选中
-  return prov_1
+  const { item_node_id, audit_content } = choiceRow
+  const prov_1 = !item_node_id //           没选中
+  const prov_2 = audit_content === '作废' // 审核状态 === '作废'
+  return prov_1 || prov_2
 }
 
 /**
  * [禁用条件：变更节点]
  */
 Tool._disabledChange = function (choiceRow = {}) {
-  const { item_node_id, adjustment_audit_result, audit_status } = choiceRow
+  const { item_node_id, adjustment_audit_result, audit_status, audit_content } = choiceRow
   const prov_1 = !item_node_id //                           没选中
   const prov_2 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中
   const prov_3 = String(audit_status) === '1' //            提报状态：草稿中
   const prov_4 = String(audit_status) === '2' //            提报状态：审核汇总
-  return prov_1 || prov_2 || prov_3 || prov_4
+  const prov_5 = audit_content === '作废' //                 审核状态 === '作废'
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5
 }
 
 /**
  * [禁用条件：取消完成]
  */
 Tool._disabledCancel = function (choiceRow = {}) {
-  const { item_node_id, completion_method, is_complete, adjustment_audit_result, audit_status } = choiceRow
+  const { item_node_id, completion_method, is_complete, adjustment_audit_result, audit_status, audit_content } = choiceRow
   const prov_1 = !item_node_id //                           没选中
   const prov_2 = String(completion_method) === '2' //       自动完成
   const prov_3 = String(is_complete) === '0' //             未完成
   const prov_4 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中 +++
   const prov_5 = String(audit_status) === '1' //            提报状态：草稿中 +++
   const prov_6 = String(audit_status) === '2' //            提报状态：审核汇总 +++
-  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6
+  const prov_7 = audit_content === '作废' //                 审核状态 === '作废'
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6 || prov_7
 }
 
 /**
  * [禁用条件：调整完成比例]
  */
 Tool._disabledTuneUp = function (choiceRow = {}) {
-  const { item_node_id, node_complete_id, is_complete, adjustment_audit_result, audit_status } = choiceRow
+  const { item_node_id, node_complete_id, is_complete, adjustment_audit_result, audit_status, audit_content } = choiceRow
   const prov_1 = !item_node_id //                           没选中
   const prov_2 = !node_complete_id //                       没有'节点完成ID'
   const prov_3 = String(is_complete) === '0' //             未完成
   const prov_4 = String(adjustment_audit_result) === '2' // 变更审核状态：变更审核中 +++
   const prov_5 = String(audit_status) === '1' //            提报状态：草稿中 +++
   const prov_6 = String(audit_status) === '2' //            提报状态：审核汇总 +++
-  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6
+  const prov_7 = audit_content === '作废' //                 审核状态 === '作废'
+  return prov_1 || prov_2 || prov_3 || prov_4 || prov_5 || prov_6 || prov_7
 }
 
 export default Tool

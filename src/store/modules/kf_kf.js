@@ -22,6 +22,9 @@ const KfKf = {
     /* 高级查询 */
     isDialog: false, //          是否显示
     filter_data: [], //          搜索值
+    /* 表头查询 */
+    tableHeader: {}, //          表头查询对象
+    businessObj: {}, //          岗位查询对象
     /* 表格数据：外部 */
     tableData_1: [], //          表格数据
     tableNodes: [], //           表格节点
@@ -51,35 +54,36 @@ const KfKf = {
      */
     A_tableData({ state }) {
       // const res = JSON.parse(localStorage.getItem('面料__分色'))
-      // const { data, nums, title, yjts } = res
+      // const { data, nums, title, yjts, businesspost } = res
       // /* 给数据添加属性 */
       // const list = Tool.mapData(data, yjts, 'nodes')
       // /* 赋值 */
-      // state.tableData_1 = list //  表格数据
-      // state.pageCount = nums //    总条数
-      // state.tableNodes = title //  列：表格外层
-      // state.loadingPage = false // 隐藏加载动画
+      // state.tableData_1 = list //          表格数据
+      // state.pageCount = nums //            总条数
+      // state.tableNodes = title //          列：表格外层
+      // state.loadingPage = false //         隐藏加载动画
+      // state.businesspost = businesspost // 岗位
 
-      const { pagenum, rownum, loadingPage, filter_data } = state
+      const { pagenum, rownum, loadingPage, filter_data, tableHeader, businessObj } = state
       if (!loadingPage) {
         state.loadingPage = true
         // const empid = '965BAD8F4EF5C14CE4F607E77D30B9B5'
         const empid = ''
         /* 发起请求 */
         const name = '统计列表'
-        const obj = { filter_data: JSON.stringify(filter_data), type: 4, page: parseInt(pagenum) - 1, num: rownum, empid }
+        const obj = { filter_data: JSON.stringify(filter_data), titleSearch: JSON.stringify(tableHeader), postEmpSearch: JSON.stringify(businessObj), type: 4, page: parseInt(pagenum) - 1, num: rownum, empid }
         const suc = function (res) {
           // console.log(res)
           // localStorage.setItem('大货汇总', JSON.stringify(res))
-          const { data, nums, title, yjts } = res
+          const { data, nums, title, yjts, businesspost } = res
           /* 给数据添加属性 */
           const list = Tool.mapData(data, yjts, 'nodes')
           /* 赋值 */
-          state.tableData_1 = list //  表格数据
-          state.pageCount = nums //    总条数
-          state.tableNodes = title //  列：表格外层
-          // console.log('节点列 ----- ', title)
-          state.loadingPage = false // 隐藏加载动画
+          state.tableData_1 = list //          表格数据
+          state.pageCount = nums //            总条数
+          state.tableNodes = title //          列：表格外层
+          state.loadingPage = false //         隐藏加载动画
+          state.businesspost = businesspost // 岗位
         }
         Api({ name, obj, suc })
       }
