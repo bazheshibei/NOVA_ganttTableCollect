@@ -31,6 +31,7 @@ const MlFs = {
     tableData_1: [], //          表格数据
     tableNodes: [], //           表格节点
     disabledChange: {}, //       禁止：批量节点变更 { id: true }
+    businesspost: [], //         岗位
     /* 表格数据：内部 */
     tableData_2: {}, //          内部节点（列）
     node_name: '', //            搜索：节点名称

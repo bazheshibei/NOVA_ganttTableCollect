@@ -32,6 +32,7 @@ const DhDh = {
     disabledChange: {}, //       禁止：批量节点变更 { id: true }
     businesspost: [], //         岗位
     /* 表格数据：内部 */
+    tableNum: 1, //              查询后重新渲染表格
     tableData_2: {}, //          内部节点（列）
     node_name: '', //            搜索：节点名称
     status: '', //               搜索：节点状态
@@ -54,7 +55,7 @@ const DhDh = {
     /**
      * [请求：表格基础数据]
      */
-    A_tableData({ state }) {
+    A_tableData({ state }, asd = '') {
       // const res = LocalData['大货：大货列表']
       // const { data, nums, title, yjts, businesspost } = res
       // /* 给数据添加属性 */
@@ -81,6 +82,7 @@ const DhDh = {
           /* 给数据添加属性 */
           const list = Tool.mapData(data, yjts, 'nodes')
           /* 赋值 */
+          state.tableNum = state.tableNum + 1
           state.tableData_1 = list //          表格数据
           state.pageCount = nums //            总条数
           state.tableNodes = title //          列：表格外层

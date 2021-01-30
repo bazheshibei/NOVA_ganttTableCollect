@@ -5,7 +5,8 @@
 
   <div>
 
-    <el-table class="pageComTable" :data="tableData_1" border :max-height="tableHeight" :highlight-current-row="true"
+    <el-table v-for="tNum in tableNum" :key="'table_' + tNum" v-if="tNum === tableNum"
+      class="pageComTable" :data="tableData_1" border :max-height="tableHeight" :highlight-current-row="true"
       row-key="index" :expand-row-keys="showIndex" :cell-style="cellStyle" @expand-change="showMore" @row-click="rowClick"
     >
       <!-- 折叠内容 -->
@@ -231,7 +232,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('DhDh', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading', 'businesspost'])
+    ...mapState('DhDh', ['tableData_1', 'tableData_2', 'tableNodes', 'pageObj', 'loading', 'businesspost', 'tableNum'])
   },
   methods: {
     /**
@@ -273,7 +274,7 @@ export default {
       this.$store.commit('saveData', { module: 'DhDh', name: 'tableHeader', obj: obj_1 })
       this.$store.commit('saveData', { module: 'DhDh', name: 'businessObj', obj: obj_2 })
       /** 查询 **/
-      this.$store.dispatch('DhDh/A_tableData')
+      this.$store.dispatch('DhDh/A_tableData', { asd: 'asd' })
     },
     /**
      * [处理搜索条件]

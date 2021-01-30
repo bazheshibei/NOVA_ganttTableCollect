@@ -18,6 +18,7 @@ const MlXz = {
     /* 表格数据：外部 */
     tableData_1: [], //    表格数据
     tableNodes: [], //     表格节点
+    businesspost: [], //   岗位
     /* 分页：外部 */
     pagenum: 1, //         页数
     rownum: 20, //         每页条数
